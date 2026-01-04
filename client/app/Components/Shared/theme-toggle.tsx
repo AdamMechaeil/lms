@@ -2,6 +2,8 @@
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Sun, Moon } from "lucide-react";
 
 export function ThemeToggle() {
   const { setTheme, theme } = useTheme();
@@ -15,12 +17,45 @@ export function ThemeToggle() {
     return null;
   }
 
+  const isDark = theme === "dark";
+
   return (
-    <button
-      className="p-2 border rounded bg-card text-card-foreground"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+    <motion.button
+      whileTap={{ scale: 0.9 }}
+      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-50 p-3 rounded-full bg-secondary/30 hover:bg-secondary/50 transition-colors"
+      aria-label="Toggle Theme"
     >
-      Toggle Theme (Current: {theme})
-    </button>
+      <div className="relative w-6 h-6 flex items-center justify-center">
+        {/* Sun Icon */}
+        <motion.div
+          initial={false}
+          animate={{
+            scale: isDark ? 0 : 1,
+            rotate: isDark ? 90 : 0,
+            opacity: isDark ? 0 : 1,
+          }}
+          transition={{ duration: 0.2 }}
+          className="absolute"
+        >
+          <Sun className="w-6 h-6 text-yellow-500" />
+        </motion.div>
+
+        {/* Moon Icon */}
+        <motion.div
+          initial={false}
+          animate={{
+            scale: isDark ? 1 : 0,
+            rotate: isDark ? 0 : -90,
+            opacity: isDark ? 1 : 0,
+          }}
+          transition={{ duration: 0.2 }}
+          className="absolute"
+        >
+          <Moon className="w-6 h-6 text-blue-400" />
+        </motion.div>
+      </div>
+    </motion.button>
   );
 }
