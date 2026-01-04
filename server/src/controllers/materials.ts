@@ -1,0 +1,120 @@
+import { Request, Response } from "express";
+import MaterialModel from "../models/materials.js";
+import fs from "fs";
+import MaterialBatchLinkModel from "../models/materialbatchlink.js";
+export const createMaterial = async (req: Request, res: Response) => {
+  try {
+    const files = req.files as Express.Multer.File[];
+    if (!files || files.length === 0) {
+      return res.status(400).json({ error: "No files uploaded" });
+    }
+
+    const createdMaterials = await Promise.all(
+      files.map(async (file) => {
+        return await MaterialModel.create({
+          ...req.body,
+          file: file.filename,
+        });
+      })
+    );
+
+    res.status(201).json(createdMaterials);
+  } catch (error) {
+    console.error("Error creating material:", error);
+    //@ts-ignore
+    req.files.forEach((file: Express.Multer.File) => {
+      fs.unlinkSync(`${process.cwd()}/assets/materials/${file.filename}`);
+    });
+    res.status(500).json({ error: "Failed to create material" });
+  }
+};
+
+export const getAllMaterials = async (req: Request, res: Response) => {
+  try {
+    const { type, page = 1, limit = 10 } = req.query;
+
+    const query: any = {};
+    if (type) query.type = type;
+
+    const pageNumber = parseInt(page as string);
+    const limitNumber = parseInt(limit as string);
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const materials = await MaterialModel.find(query)
+      .skip(skip)
+      .limit(limitNumber);
+
+    const total = await MaterialModel.countDocuments(query);
+
+    res.status(200).json({
+      data: materials,
+      total,
+      page: pageNumber,
+      totalPages: Math.ceil(total / limitNumber),
+    });
+  } catch (error) {
+    console.error("Error getting materials:", error);
+    res.status(500).json({ error: "Failed to get materials" });
+  }
+};
+
+export const getMaterialById = async (req: Request, res: Response) => {
+  try {
+    const material = await MaterialModel.findById(req.params.id);
+    if (!material) {
+      return res.status(404).json({ error: "Material not found" });
+    }
+    res.status(200).json(material);
+  } catch (error) {
+    console.error("Error getting material:", error);
+    res.status(500).json({ error: "Failed to get material" });
+  }
+};
+
+export const updateMaterial = async (req: Request, res: Response) => {
+  try {
+    const material = await MaterialModel.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    if (!material) {
+      return res.status(404).json({ error: "Material not found" });
+    }
+    res.status(200).json(material);
+  } catch (error) {
+    console.error("Error updating material:", error);
+    res.status(500).json({ error: "Failed to update material" });
+  }
+};
+
+export const deleteMaterial = async (req: Request, res: Response) => {
+  try {
+    const material = await MaterialModel.findByIdAndDelete(req.params.id);
+    if (!material) {
+      return res.status(404).json({ error: "Material not found" });
+    }
+    res.status(200).json(material);
+  } catch (error) {
+    console.error("Error deleting material:", error);
+    res.status(500).json({ error: "Failed to delete material" });
+  }
+};
+
+export const assignMaterialsToBatch = async (req: Request, res: Response) => {
+  try {
+    const { batchId, materials } = req.body;
+    materials.forEach(async (materialId: string) => {
+      await MaterialBatchLinkModel.create({
+        batch: batchId,
+        material: materialId,
+      });
+    });
+    res
+      .status(200)
+      .json({ message: "Materials assigned to batch successfully" });
+  } catch (error) {
+    console.error("Error assigning materials to batch:", error);
+    res.status(500).json({ error: "Failed to assign materials to batch" });
+  }
+};

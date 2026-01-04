@@ -1,0 +1,10 @@
+/client/node_modules
+/server/node_modules
+/client/package-lock.json
+/client/.next
+/server/dist/
+/server/assets
+/server/package-lock.json
+/server/src/config/config.env
+/client/.env
+/server/swagger_output.json
