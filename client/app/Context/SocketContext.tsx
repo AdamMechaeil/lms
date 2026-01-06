@@ -18,10 +18,13 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // 1. Only connect if user exists AND is a trainer
-    if (user && user.role === "trainer") {
-      const socketInstance = io(process.env.NEXT_PUBLIC_DEV_BASE_URL || "", {
-        withCredentials: true, // Important for cookies/session
-      });
+    if (user && user.role.toLowerCase() === "trainer") {
+      const socketInstance = io(
+        process.env.NEXT_PUBLIC_DEV_BASE_URL || "http://localhost:8000",
+        {
+          withCredentials: true, // Important for cookies/session
+        }
+      );
 
       socketInstance.on("connect", () => {
         setIsConnected(true);
