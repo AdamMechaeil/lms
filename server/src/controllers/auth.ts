@@ -10,17 +10,27 @@ import TrainerModel from "../models/trainer.js";
 export async function adminGoogleLogin(req: Request, res: Response) {
   try {
     const { token } = req.body;
-    const response = await axios.get(
-      "https://www.googleapis.com/oauth2/v3/userinfo",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    const { email } = response.data;
+    const client = new google.auth.OAuth2(process.env.GOOGLE_CLIENT_ID);
+
+    // Verify the ID token
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email) {
+      return res.status(401).json({ message: "Invalid Google Token" });
+    }
+
+    const { email } = payload;
     const isEmailExist = await EmailModel.findOne({ email });
     if (isEmailExist) {
+      if (isEmailExist.role !== "Admin") {
+        return res
+          .status(401)
+          .json({ message: "Unauthorized! You are not an Admin." });
+      }
       const admin = await import("../models/admin.js").then((m) =>
         m.default.findOne({ email: isEmailExist._id })
       );
@@ -60,17 +70,27 @@ export async function adminGoogleLogin(req: Request, res: Response) {
 export async function trainerGoogleLogin(req: Request, res: Response) {
   try {
     const { token } = req.body;
-    const response = await axios.get(
-      "https://www.googleapis.com/oauth2/v3/userinfo",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    const { email } = response.data;
+    const client = new google.auth.OAuth2(process.env.GOOGLE_CLIENT_ID);
+
+    // Verify the ID token
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email) {
+      return res.status(401).json({ message: "Invalid Google Token" });
+    }
+
+    const { email } = payload;
     const isEmailExist = await EmailModel.findOne({ email });
     if (isEmailExist) {
+      if (isEmailExist.role !== "Trainer") {
+        return res
+          .status(401)
+          .json({ message: "Unauthorized! You are not a Trainer." });
+      }
       const trainer = await TrainerModel.findOne({ email: isEmailExist._id });
       const jwtToken = jwt.sign(
         { email, role: isEmailExist.role, userId: trainer?._id },
