@@ -4,3 +4,4 @@ export const VERIFY_TOKEN = "/auth/verify-token";
 export const CONNECT_GOOGLE = "/auth/connect-google";
 export const UPDATE_STUDENT_PASSWORD = "/auth/student/update-password";
 export const LOGOUT = "/auth/logout";
+export const STUDENT_LOGIN = "/auth/student/login";
