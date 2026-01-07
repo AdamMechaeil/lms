@@ -3,6 +3,10 @@ import {
   ADMIN_LOGIN,
   TRAINER_LOGIN,
   CONNECT_GOOGLE,
+  STUDENT_LOGIN,
+  UPDATE_STUDENT_PASSWORD,
+  VERIFY_TOKEN,
+  LOGOUT,
 } from "../Utils/Constants/Auth";
 
 export async function Adminlogin(token: string) {
@@ -14,9 +18,13 @@ export async function Adminlogin(token: string) {
   }
 }
 
-export function Studentlogin() {
+export async function Studentlogin(data: any) {
   try {
-  } catch (error) {}
+    const response = await AxiosInstance.post(STUDENT_LOGIN, data);
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data?.message || "Login failed";
+  }
 }
 
 export async function Trainerlogin(token: string) {
@@ -40,17 +48,29 @@ export async function ConnectGoogle(code: string, trainerId: string) {
   }
 }
 
-export function UpdateStudentPassword() {
+export async function UpdateStudentPassword(data: any) {
   try {
-  } catch (error) {}
+    const response = await AxiosInstance.post(UPDATE_STUDENT_PASSWORD, data);
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data?.message || "Failed to update password";
+  }
 }
 
-export function VerifyToken() {
+export async function VerifyToken() {
   try {
-  } catch (error) {}
+    const response = await AxiosInstance.post(VERIFY_TOKEN);
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data?.message || "Token verification failed";
+  }
 }
 
-export function Logout() {
+export async function Logout() {
   try {
-  } catch (error) {}
+    const response = await AxiosInstance.post(LOGOUT);
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data?.message || "Logout failed";
+  }
 }

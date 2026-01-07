@@ -69,6 +69,7 @@ export default function Main() {
                     );
                     login(response);
                     toast.success("Login successful");
+                    window.location.href = "/Dashboard/admin"; // Using direct navigation to ensure full reload if needed, or stick to router
                   }
                 } catch (error: any) {
                   toast.error(error);
