@@ -5,6 +5,7 @@ import { AuthProvider } from "@/app/Context/Authcontext";
 import { SocketProvider } from "@/app/Context/SocketContext";
 import { ThemeToggle } from "@/app/Components/Shared/theme-toggle";
 import { Toaster } from "sonner";
+import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -38,6 +39,17 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <NextTopLoader
+            color="#7c3aed"
+            initialPosition={0.08}
+            crawlSpeed={200}
+            height={3}
+            crawl={true}
+            showSpinner={false}
+            easing="ease"
+            speed={200}
+            shadow="0 0 10px #7c3aed,0 0 5px #7c3aed"
+          />
           <AuthProvider>
             <SocketProvider>
               {children}
