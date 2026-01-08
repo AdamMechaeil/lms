@@ -91,7 +91,23 @@ export async function getAllTrainers(req: Request, res: Response) {
     // Facet for pagination and total count
     pipeline.push({
       $facet: {
-        data: [{ $skip: skip }, { $limit: limitNumber }],
+        data: [
+          { $skip: skip },
+          { $limit: limitNumber },
+          {
+            $project: {
+              name: 1,
+              email: 1,
+              branch: 1,
+              domain: 1,
+              mobileNumber: 1,
+              designation: 1,
+              profilePicture: 1,
+              gender: 1,
+              firstLogin: 1,
+            },
+          },
+        ],
         totalCount: [{ $count: "count" }],
       },
     });

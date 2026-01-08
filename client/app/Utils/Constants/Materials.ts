@@ -1,6 +1,7 @@
-export const CREATE_MATERIAL = "/materials/createMaterial";
-export const GET_ALL_MATERIALS = "/materials/getAllMaterials";
-export const GET_MATERIAL_BY_ID = "/materials/getMaterialById";
-export const UPDATE_MATERIAL = "/materials/updateMaterial";
-export const DELETE_MATERIAL = "/materials/deleteMaterial";
-export const ASSIGN_MATERIALS_TO_BATCH = "/materials/assignMaterialsToBatch";
+export const CREATE_MATERIAL = "/api/v1/material/createMaterial";
+export const GET_ALL_MATERIALS = "/api/v1/material/getAllMaterials";
+export const GET_MATERIAL_BY_ID = "/api/v1/material/getMaterialById";
+export const UPDATE_MATERIAL = "/api/v1/material/updateMaterial";
+export const DELETE_MATERIAL = "/api/v1/material/deleteMaterial";
+export const ASSIGN_MATERIALS_TO_BATCH =
+  "/api/v1/material/assignMaterialsToBatch";

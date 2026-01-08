@@ -7,51 +7,22 @@ import {
   SidebarBody,
   SidebarLink,
 } from "../ui/sidebar";
-import {
-  LayoutDashboard,
-  Users,
-  GraduationCap,
-  Building2,
-  LogOut,
-} from "lucide-react";
+import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { cn } from "@/app/Utils/cn";
 import { Logout } from "@/app/Services/Auth";
 import { BRAND_NAME } from "@/app/Utils/Constants/Brandname";
 
-const SIDEBAR_ITEMS = [
-  {
-    label: "Dashboard",
-    href: "/Dashboard/admin",
-    icon: (
-      <LayoutDashboard className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-    ),
-  },
-  {
-    label: "Trainers",
-    href: "/Dashboard/trainers",
-    icon: (
-      <Users className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-    ),
-  },
-  {
-    label: "Students",
-    href: "/Dashboard/students",
-    icon: (
-      <GraduationCap className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-    ),
-  },
-  {
-    label: "Branches",
-    href: "/Dashboard/branches",
-    icon: (
-      <Building2 className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-    ),
-  },
-];
+interface SidebarProps {
+  links: {
+    label: string;
+    href: string;
+    icon: React.ReactNode;
+  }[];
+}
 
-export const Sidebar = () => {
+export const Sidebar = ({ links }: SidebarProps) => {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -62,7 +33,7 @@ export const Sidebar = () => {
 
   return (
     <SidebarPrimitive open={open} setOpen={setOpen}>
-      <SidebarBody className="justify-between gap-10">
+      <SidebarBody className="justify-between gap-10 bg-white/20 dark:bg-black/20 backdrop-blur-md border-r border-slate-200 dark:border-white/10 shadow-xl transition-colors duration-300">
         <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
           {/* Logo */}
           <div className="flex flex-col">
@@ -86,7 +57,7 @@ export const Sidebar = () => {
 
           {/* Links */}
           <div className="mt-8 flex flex-col gap-2">
-            {SIDEBAR_ITEMS.map((item, idx) => {
+            {links.map((item, idx) => {
               const isActive = pathname === item.href;
               return (
                 <SidebarLink

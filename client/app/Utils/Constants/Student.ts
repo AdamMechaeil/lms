@@ -1,5 +1,5 @@
-export const CREATE_STUDENT = "/student/createStudent";
-export const GET_ALL_STUDENTS = "/student/getAllStudents";
-export const GET_STUDENT_BY_ID = "/student/getStudentById";
-export const UPDATE_STUDENT = "/student/updateStudent";
-export const DELETE_STUDENT = "/student/deleteStudent";
+export const CREATE_STUDENT = "/api/v1/student/createStudent";
+export const GET_ALL_STUDENTS = "/api/v1/student/getAllStudents";
+export const GET_STUDENT_BY_ID = "/api/v1/student/getStudentById";
+export const UPDATE_STUDENT = "/api/v1/student/updateStudent";
+export const DELETE_STUDENT = "/api/v1/student/deleteStudent";
