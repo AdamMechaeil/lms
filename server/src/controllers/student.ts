@@ -152,7 +152,9 @@ export const getAllStudents = async (req: Request, res: Response) => {
 
 export const getStudentById = async (req: Request, res: Response) => {
   try {
-    const student = await StudentModel.findById(req.params.id);
+    const student = await StudentModel.findById(req.params.id).populate(
+      "branch"
+    );
     res.status(200).send(student);
   } catch (error) {
     res.status(500).send("Internal Server Error");

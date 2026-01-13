@@ -1,10 +1,23 @@
+"use client";
+import dynamic from "next/dynamic";
+import { Loader2 } from "lucide-react";
+
+const Trainers = dynamic(
+  () => import("@/app/Components/Dashboard/Admin/Trainers"),
+  {
+    loading: () => (
+      <div className="flex justify-center items-center h-[50vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
 export default function TrainersPage() {
   return (
     <div className="p-8 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">Trainers Management</h1>
-      <p className="text-neutral-600 dark:text-neutral-400">
-        Manage your trainers here.
-      </p>
+      <Trainers />
     </div>
   );
 }

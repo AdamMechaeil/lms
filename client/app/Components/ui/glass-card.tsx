@@ -9,16 +9,18 @@ import React from "react";
 export const GlassCard = ({
   children,
   className,
+  ...props
 }: {
   children: React.ReactNode;
   className?: string;
-}) => {
+} & React.HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
       className={cn(
         "p-6 rounded-xl border border-slate-200 dark:border-white/10 bg-white/30 dark:bg-black/40 backdrop-blur-md shadow-lg hover:shadow-xl dark:shadow-none transition-all duration-300 hover:bg-white/40 dark:hover:bg-black/50",
         className
       )}
+      {...props}
     >
       {children}
     </div>

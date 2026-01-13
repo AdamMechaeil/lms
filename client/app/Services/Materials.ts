@@ -6,6 +6,7 @@ import {
   UPDATE_MATERIAL,
   DELETE_MATERIAL,
   ASSIGN_MATERIALS_TO_BATCH,
+  GET_MATERIALS_BY_BATCH,
 } from "../Utils/Constants/Materials";
 
 export async function createMaterial(data: FormData) {
@@ -69,5 +70,16 @@ export async function assignMaterialsToBatch(data: any) {
     throw (
       error.response?.data?.message || "Failed to assign materials to batch"
     );
+  }
+}
+
+export async function getMaterialsByBatch(batchId: string) {
+  try {
+    const response = await AxiosInstance.get(
+      `${GET_MATERIALS_BY_BATCH}/${batchId}`
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data?.message || "Failed to fetch batch materials";
   }
 }

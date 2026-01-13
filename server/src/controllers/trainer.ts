@@ -134,7 +134,8 @@ export async function getTrainerById(req: Request, res: Response) {
     const { id } = req.params;
     const trainer = await TrainerModel.findById(id)
       .populate("branch")
-      .populate("domain");
+      .populate("domain")
+      .populate("email");
     if (!trainer) {
       return res.status(404).json({ error: "Trainer not found" });
     }
@@ -148,21 +149,36 @@ export async function getTrainerById(req: Request, res: Response) {
 export async function updateTrainer(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const updateData = { ...req.body };
+    const { email, ...otherData } = req.body; // Extract email string
+    const updateData: any = { ...otherData };
+
     if (req.file) {
       updateData.profilePicture = req.file.filename;
     }
-    const trainer = await TrainerModel.findByIdAndUpdate(id, updateData, {
-      new: true,
-    });
-    await EmailModel.findByIdAndUpdate(trainer?.email, req.body);
-    if (!trainer) {
+
+    // Find the trainer to get the Email ID
+    const existingTrainer = await TrainerModel.findById(id);
+    if (!existingTrainer) {
       return res.status(404).json({ error: "Trainer not found" });
     }
+
+    // Update Email document if email is provided
+    if (email) {
+      await EmailModel.findByIdAndUpdate(existingTrainer.email, { email });
+    }
+
+    // Update Trainer document (excluding email)
+    const trainer = await TrainerModel.findByIdAndUpdate(id, updateData, {
+      new: true,
+    })
+      .populate("email")
+      .populate("branch")
+      .populate("domain");
+
     res.status(200).json(trainer);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to update trainer" });
+    console.error("Update Trainer Error:", error);
+    res.status(500).json({ error: "Failed to update trainer", details: error });
   }
 }
 

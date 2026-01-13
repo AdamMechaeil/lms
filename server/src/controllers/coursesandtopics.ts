@@ -303,3 +303,41 @@ export const getCourseTopics = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed To Get Course Topics" });
   }
 };
+
+export const getCoursesByStudent = async (req: Request, res: Response) => {
+  try {
+    const studentId = req.params.id;
+
+    if (!studentId) {
+      res.status(400).json({ error: "Student ID is required" });
+      return;
+    }
+
+    const courses = await CourseStudentLinkModel.aggregate([
+      {
+        $match: {
+          student: new mongoose.Types.ObjectId(studentId),
+        },
+      },
+      {
+        $lookup: {
+          from: "courses",
+          localField: "course",
+          foreignField: "_id",
+          as: "courseDetails",
+        },
+      },
+      {
+        $unwind: "$courseDetails",
+      },
+      {
+        $replaceRoot: { newRoot: "$courseDetails" },
+      },
+    ]);
+
+    res.status(200).json(courses);
+  } catch (error) {
+    console.error("Error getting courses by student:", error);
+    res.status(500).json({ error: "Failed To Get Student Courses" });
+  }
+};

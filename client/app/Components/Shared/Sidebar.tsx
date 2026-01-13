@@ -20,15 +20,19 @@ interface SidebarProps {
     href: string;
     icon: React.ReactNode;
   }[];
+  userType?: "admin" | "trainer" | "student";
 }
 
-export const Sidebar = ({ links }: SidebarProps) => {
+export const Sidebar = ({ links, userType = "admin" }: SidebarProps) => {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
   const handleLogout = async () => {
     await Logout();
-    window.location.href = "/Auth/admin";
+    let redirectUrl = "/Auth/login";
+    if (userType === "student") redirectUrl = "/Auth/student";
+    if (userType === "trainer") redirectUrl = "/Auth/trainer";
+    window.location.href = redirectUrl;
   };
 
   return (

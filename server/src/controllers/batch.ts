@@ -257,8 +257,73 @@ export async function getBatchRecordings(req: Request, res: Response) {
     });
 
     res.status(200).json({ recordings: response.data.files });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching recordings:", error);
+    if (
+      error.response?.data?.error === "invalid_grant" ||
+      error.message?.includes("invalid_grant")
+    ) {
+      return res.status(401).json({
+        message:
+          "Google connection expired. Please reconnect your Google account in settings.",
+        code: "GOOGLE_TOKEN_EXPIRED",
+      });
+    }
     res.status(500).json({ message: "Failed to fetch recordings" });
   }
 }
+
+export const getBatchesByStudent = async (req: Request, res: Response) => {
+  try {
+    const { studentId } = req.params;
+    if (!studentId) {
+      return res.status(400).json({ message: "Student ID is required" });
+    }
+
+    const batches = await StudentBatchLinkModel.find({ student: studentId })
+      .populate("batch")
+      .populate({
+        path: "batch",
+        populate: [
+          { path: "branch", select: "name" },
+          { path: "trainer", select: "name" },
+        ],
+      });
+
+    // Flatten logic
+    const formattedBatches = batches
+      .map((link: any) => link.batch)
+      .filter(Boolean);
+
+    res.status(200).json(formattedBatches);
+  } catch (error) {
+    console.error("Error fetching student batches:", error);
+    res.status(500).json({ message: "Failed to fetch student batches" });
+  }
+};
+
+export const removeStudentFromBatch = async (req: Request, res: Response) => {
+  try {
+    const { batchId, studentId } = req.body;
+
+    if (!batchId || !studentId) {
+      return res.status(400).json({
+        error: "Invalid input. batchId and studentId are required.",
+      });
+    }
+
+    const deletedLink = await StudentBatchLinkModel.findOneAndDelete({
+      batch: batchId,
+      student: studentId,
+    });
+
+    if (!deletedLink) {
+      return res.status(404).json({ error: "Student not found in this batch" });
+    }
+
+    res.status(200).json("Student removed from batch successfully");
+  } catch (error) {
+    console.error("Error removing student from batch:", error);
+    res.status(500).json({ error: "Failed To Remove Student From Batch" });
+  }
+};

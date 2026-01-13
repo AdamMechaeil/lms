@@ -18,3 +18,5 @@ export const ASSIGN_TOPICS_TO_COURSE =
 export const GET_COURSE_TOPICS = "/api/v1/coursesandtopics/getCourseTopics";
 export const ASSIGN_COURSE_TO_STUDENT =
   "/api/v1/coursesandtopics/assignCourseToStudent";
+export const GET_COURSES_BY_STUDENT =
+  "/api/v1/coursesandtopics/getCoursesByStudent";

@@ -6,3 +6,5 @@ export const DELETE_BATCH = "/api/v1/batch/deleteBatch";
 export const ASSIGN_BATCH_TO_STUDENT = "/api/v1/batch/assignBatchToStudent";
 export const CREATE_BATCH_MEET_LINK = "/api/v1/batch/createBatchMeetLink";
 export const GET_BATCH_RECORDINGS = "/api/v1/batch/getBatchRecordings";
+export const GET_BATCHES_BY_STUDENT = "/api/v1/batch/getBatchesByStudent";
+export const REMOVE_STUDENT_FROM_BATCH = "/api/v1/batch/removeStudentFromBatch";

@@ -13,6 +13,7 @@ import {
   ASSIGN_TOPICS_TO_COURSE,
   GET_COURSE_TOPICS,
   ASSIGN_COURSE_TO_STUDENT,
+  GET_COURSES_BY_STUDENT,
 } from "../Utils/Constants/CoursesAndTopics";
 
 // Courses
@@ -132,5 +133,14 @@ export async function assignCourseToStudent(data: any) {
     return response.data;
   } catch (error: any) {
     throw error.response?.data?.message || "Failed to assign course to student";
+  }
+}
+
+export async function getCoursesByStudent(id: string) {
+  try {
+    const response = await AxiosInstance.get(`${GET_COURSES_BY_STUDENT}/${id}`);
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data?.message || "Failed to fetch student courses";
   }
 }
