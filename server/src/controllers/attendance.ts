@@ -157,7 +157,17 @@ export const getTrainerAttendanceHistory = async (
       .sort({ date: -1 })
       .skip(skip)
       .limit(Number(limit))
-      .populate("trainerId", "name email branch domain");
+      .populate({
+        path: "trainerId",
+        select:
+          "name email branch domain profilePicture designation mobileNumber",
+        populate: [
+          { path: "branch", select: "name" },
+          { path: "domain", select: "name" },
+          { path: "email", select: "email" },
+        ],
+      })
+      .populate("sessionIds");
 
     const total = await TrainerAttendanceModel.countDocuments(query);
 

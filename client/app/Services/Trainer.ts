@@ -16,7 +16,11 @@ export async function addTrainer(data: FormData) {
     });
     return response.data;
   } catch (error: any) {
-    throw error.response?.data?.message || "Failed to add trainer";
+    throw (
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      "Failed to add trainer"
+    );
   }
 }
 
@@ -25,7 +29,11 @@ export async function getAllTrainers(params?: any) {
     const response = await AxiosInstance.get(GET_ALL_TRAINERS, { params });
     return response.data;
   } catch (error: any) {
-    throw error.response?.data?.message || "Failed to fetch trainers";
+    throw (
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      "Failed to fetch trainers"
+    );
   }
 }
 
@@ -34,7 +42,11 @@ export async function getTrainerById(id: string) {
     const response = await AxiosInstance.get(`${GET_TRAINER_BY_ID}/${id}`);
     return response.data;
   } catch (error: any) {
-    throw error.response?.data?.message || "Failed to fetch trainer";
+    throw (
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      "Failed to fetch trainer"
+    );
   }
 }
 
@@ -47,7 +59,11 @@ export async function updateTrainer(id: string, data: FormData) {
     });
     return response.data;
   } catch (error: any) {
-    throw error.response?.data?.message || "Failed to update trainer";
+    throw (
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      "Failed to update trainer"
+    );
   }
 }
 
@@ -56,6 +72,10 @@ export async function deleteTrainer(id: string) {
     const response = await AxiosInstance.delete(`${DELETE_TRAINER}/${id}`);
     return response.data;
   } catch (error: any) {
-    throw error.response?.data?.message || "Failed to delete trainer";
+    throw (
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      "Failed to delete trainer"
+    );
   }
 }

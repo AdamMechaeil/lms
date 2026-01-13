@@ -6,6 +6,7 @@ import {
   getAllMaterials,
   getMaterialById,
   updateMaterial,
+  getMaterialsByBatch,
 } from "../controllers/materials.js";
 import { admintrainerAuthenticator } from "../middlewares/admintrainerAuthenticator.js";
 
@@ -44,6 +45,12 @@ materialRouter.post(
   "/assignMaterialsToBatch",
   admintrainerAuthenticator,
   assignMaterialsToBatch
+);
+
+materialRouter.get(
+  "/getMaterialsByBatch/:batchId",
+  admintrainerAuthenticator,
+  getMaterialsByBatch
 );
 
 export default materialRouter;

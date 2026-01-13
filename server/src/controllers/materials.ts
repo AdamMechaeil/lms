@@ -104,17 +104,37 @@ export const deleteMaterial = async (req: Request, res: Response) => {
 export const assignMaterialsToBatch = async (req: Request, res: Response) => {
   try {
     const { batchId, materials } = req.body;
-    materials.forEach(async (materialId: string) => {
-      await MaterialBatchLinkModel.create({
-        batch: batchId,
-        material: materialId,
-      });
-    });
+    await Promise.all(
+      materials.map(async (materialId: string) => {
+        // Prevent duplicates
+        return await MaterialBatchLinkModel.findOneAndUpdate(
+          { batch: batchId, material: materialId },
+          { batch: batchId, material: materialId },
+          { upsert: true, new: true }
+        );
+      })
+    );
     res
       .status(200)
       .json({ message: "Materials assigned to batch successfully" });
   } catch (error) {
     console.error("Error assigning materials to batch:", error);
     res.status(500).json({ error: "Failed to assign materials to batch" });
+  }
+};
+
+export const getMaterialsByBatch = async (req: Request, res: Response) => {
+  try {
+    const { batchId } = req.params;
+    const links = await MaterialBatchLinkModel.find({
+      batch: batchId,
+    }).populate("material");
+    const materials = links
+      .map((link: any) => link.material)
+      .filter((m: any) => m !== null); // Filter out any nulls if material was deleted
+    res.status(200).json(materials);
+  } catch (error) {
+    console.error("Error fetching batch materials:", error);
+    res.status(500).json({ error: "Failed to fetch batch materials" });
   }
 };

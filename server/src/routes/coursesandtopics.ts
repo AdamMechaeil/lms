@@ -9,6 +9,7 @@ import {
   getAllCourses,
   getAllTopics,
   getCourseById,
+  getCoursesByStudent,
   getCourseTopics,
   getTopicById,
   updateCourse,
@@ -69,6 +70,12 @@ coursesandtopicsRouter.post(
   "/assignCourseToStudent",
   adminAuthenticator,
   assignCourseToStudent
+);
+
+coursesandtopicsRouter.get(
+  "/getCoursesByStudent/:id",
+  adminAuthenticator,
+  getCoursesByStudent
 );
 
 export default coursesandtopicsRouter;

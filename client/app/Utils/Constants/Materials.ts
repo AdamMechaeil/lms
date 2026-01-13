@@ -5,3 +5,4 @@ export const UPDATE_MATERIAL = "/api/v1/material/updateMaterial";
 export const DELETE_MATERIAL = "/api/v1/material/deleteMaterial";
 export const ASSIGN_MATERIALS_TO_BATCH =
   "/api/v1/material/assignMaterialsToBatch";
+export const GET_MATERIALS_BY_BATCH = "/api/v1/material/getMaterialsByBatch";

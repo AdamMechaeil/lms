@@ -8,6 +8,8 @@ import {
   ASSIGN_BATCH_TO_STUDENT,
   CREATE_BATCH_MEET_LINK,
   GET_BATCH_RECORDINGS,
+  GET_BATCHES_BY_STUDENT,
+  REMOVE_STUDENT_FROM_BATCH,
 } from "../Utils/Constants/Batch";
 
 export async function createBatch(data: any) {
@@ -78,8 +80,31 @@ export async function getBatchRecordings(batchId: string) {
     const response = await AxiosInstance.get(
       `${GET_BATCH_RECORDINGS}/${batchId}`
     );
-    return response.data;
+    return response.data.recordings || [];
   } catch (error: any) {
     throw error.response?.data?.message || "Failed to fetch batch recordings";
+  }
+}
+
+export async function getBatchesByStudent(studentId: string) {
+  try {
+    const response = await AxiosInstance.get(
+      `${GET_BATCHES_BY_STUDENT}/${studentId}`
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data?.message || "Failed to fetch student batches";
+  }
+}
+export async function removeStudentFromBatch(data: any) {
+  try {
+    const response = await AxiosInstance.delete(REMOVE_STUDENT_FROM_BATCH, {
+      data,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw (
+      error.response?.data?.message || "Failed to remove student from batch"
+    );
   }
 }

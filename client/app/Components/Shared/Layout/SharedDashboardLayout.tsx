@@ -53,8 +53,8 @@ export default function SharedDashboardLayout({
       <div className="absolute inset-0 z-0">{Background}</div>
 
       {/* Glass Sidebar & Content Wrapper */}
-      <div className="relative z-10 flex h-full w-full">
-        <Sidebar links={links} />
+      <div className="relative z-10 flex flex-col md:flex-row h-full w-full">
+        <Sidebar links={links} userType={userType} />
         <main className="flex-1 overflow-y-auto relative">
           <div className="h-full w-full">{children}</div>
         </main>
