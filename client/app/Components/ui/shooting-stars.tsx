@@ -1,5 +1,5 @@
 "use client";
-import { cn } from "@/lib/utils";
+import { cn } from "@/app/Utils/cn";
 import React, { useEffect, useState, useRef } from "react";
 
 interface ShootingStar {
@@ -58,29 +58,32 @@ export const ShootingStars = ({
   }, [minDelay, maxDelay, minSpeed, maxSpeed]);
 
   useEffect(() => {
-    const moveStar = () => {
-      if (star) {
-        setStar((prevStar) => {
-          if (!prevStar) return null;
-          const newX =
-            prevStar.x +
-            prevStar.speed * Math.cos((prevStar.angle * Math.PI) / 180);
-          const newY =
-            prevStar.y +
-            prevStar.speed * Math.sin((prevStar.angle * Math.PI) / 180);
-          const newDistance = prevStar.distance - prevStar.speed;
+    let animationFrame: number;
 
-          if (newDistance <= 0) {
-            return null;
-          }
-          return { ...prevStar, x: newX, y: newY, distance: newDistance };
-        });
-      }
+    const moveStar = () => {
+      setStar((prevStar) => {
+        if (!prevStar) return null;
+        const newX =
+          prevStar.x +
+          prevStar.speed * Math.cos((prevStar.angle * Math.PI) / 180);
+        const newY =
+          prevStar.y +
+          prevStar.speed * Math.sin((prevStar.angle * Math.PI) / 180);
+        const newDistance = prevStar.distance - prevStar.speed;
+
+        if (newDistance <= 0) {
+          return null;
+        }
+        return { ...prevStar, x: newX, y: newY, distance: newDistance };
+      });
+
+      animationFrame = requestAnimationFrame(moveStar);
     };
 
-    const animationFrame = requestAnimationFrame(moveStar);
+    animationFrame = requestAnimationFrame(moveStar);
+
     return () => cancelAnimationFrame(animationFrame);
-  }, [star]);
+  }, []);
 
   return (
     <svg

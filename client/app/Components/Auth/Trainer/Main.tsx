@@ -20,7 +20,14 @@ export default function Main() {
   const [isTypingComplete, setIsTypingComplete] = useState(false);
   const [showConnectModal, setShowConnectModal] = useState(false);
   const [pendingTrainerId, setPendingTrainerId] = useState("");
+
   const [pendingLoginResponse, setPendingLoginResponse] = useState<any>(null);
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     let currentIndex = 0;
@@ -37,9 +44,11 @@ export default function Main() {
     return () => clearInterval(interval);
   }, []);
 
+  if (!mounted) return null;
+
   return (
     <WavyBackground className="max-w-4xl mx-auto flex flex-col items-center justify-center min-h-screen px-4">
-      <div className="flex flex-col items-center justify-center p-12 rounded-3xl bg-white/10 dark:bg-black/40 backdrop-blur-xl border border-white/20 shadow-2xl space-y-8">
+      <div className="relative z-10 flex flex-col items-center justify-center p-12 rounded-3xl bg-white/10 dark:bg-black/40 backdrop-blur-xl border border-white/20 shadow-2xl space-y-8">
         {/* Animated Header */}
         <div className="space-y-2 text-center">
           <h1 className="text-4xl font-bold tracking-tight sm:text-7xl">
@@ -85,6 +94,7 @@ export default function Main() {
                       // Regular login
                       login(response);
                       toast.success("Login successful");
+                      window.location.href = "/Dashboard/trainer";
                     }
                   }
                 } catch (error: any) {
@@ -112,6 +122,7 @@ export default function Main() {
           if (pendingLoginResponse) {
             const updatedUser = { ...pendingLoginResponse, firstLogin: false };
             login(updatedUser);
+            window.location.href = "/Dashboard/trainer";
           }
         }}
       />

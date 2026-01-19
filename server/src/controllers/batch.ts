@@ -90,6 +90,8 @@ export const deleteBatch = async (req: Request, res: Response) => {
   }
 };
 
+import StudentModel from "../models/student.js";
+
 export const assignBatchToStudent = async (req: Request, res: Response) => {
   try {
     const { batchId, studentId } = req.body;
@@ -101,9 +103,33 @@ export const assignBatchToStudent = async (req: Request, res: Response) => {
       return;
     }
 
+    // Try to find student by custom studentId first
+    let student = await StudentModel.findOne({ studentId: studentId });
+
+    // If not found, and it looks like an ID, try by _id (optional, for backward compat)
+    if (!student && studentId.match(/^[0-9a-fA-F]{24}$/)) {
+      student = await StudentModel.findById(studentId);
+    }
+
+    if (!student) {
+      return res.status(404).json({ error: "Student not found with that ID!" });
+    }
+
+    // Check if already assigned
+    const existingLink = await StudentBatchLinkModel.findOne({
+      batch: batchId,
+      student: student._id,
+    });
+
+    if (existingLink) {
+      return res
+        .status(400)
+        .json({ error: "Student is already in this batch!" });
+    }
+
     await StudentBatchLinkModel.create({
       batch: batchId,
-      student: studentId,
+      student: student._id,
     });
 
     res.status(201).send("Batch assigned to student successfully");
@@ -123,7 +149,7 @@ export async function createBatchMeetLink(req: Request, res: Response) {
     }
 
     const trainerData = await TrainerModel.findById(trainerId).select(
-      "+googleRefreshToken"
+      "+googleRefreshToken",
     );
 
     let googleMeetLink = "";
@@ -132,7 +158,7 @@ export async function createBatchMeetLink(req: Request, res: Response) {
       const oauth2Client = new google.auth.OAuth2(
         process.env.GOOGLE_CLIENT_ID,
         process.env.GOOGLE_CLIENT_SECRET,
-        process.env.GOOGLE_REDIRECT_URI
+        process.env.GOOGLE_REDIRECT_URI,
       );
 
       oauth2Client.setCredentials({
@@ -145,7 +171,7 @@ export async function createBatchMeetLink(req: Request, res: Response) {
         .toISOString()
         .split("T")[0];
       const eventStartTime = new Date(
-        `${startDateStr}T${batchData.startTime}:00`
+        `${startDateStr}T${batchData.startTime}:00`,
       );
       // Create a 1-hour event (or calculate based on endTime)
       const eventEndTime = new Date(eventStartTime.getTime() + 60 * 60 * 1000);
@@ -223,7 +249,7 @@ export async function getBatchRecordings(req: Request, res: Response) {
     }
 
     const trainer = await TrainerModel.findById(batch.trainer).select(
-      "+googleRefreshToken"
+      "+googleRefreshToken",
     );
     if (!trainer || !trainer.googleRefreshToken) {
       return res
@@ -234,7 +260,7 @@ export async function getBatchRecordings(req: Request, res: Response) {
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      process.env.GOOGLE_REDIRECT_URI
+      process.env.GOOGLE_REDIRECT_URI,
     );
 
     oauth2Client.setCredentials({

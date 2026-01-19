@@ -53,7 +53,7 @@ export const createStudent = async (req: Request, res: Response) => {
 
 export const getAllStudents = async (req: Request, res: Response) => {
   try {
-    const { branch, batch, course, search } = req.query;
+    const { branch, batch, course, search, trainer } = req.query;
 
     const pipeline: any[] = [];
     const matchStage: any = {};
@@ -109,7 +109,36 @@ export const getAllStudents = async (req: Request, res: Response) => {
       });
     }
 
-    // 4. Pagination and Facet
+    // 4. Filter by Trainer (Requires Multi-Level Lookup)
+    if (trainer) {
+      pipeline.push(
+        {
+          $lookup: {
+            from: "studentbatchlinks",
+            localField: "_id",
+            foreignField: "student",
+            as: "trainerBatchLinks",
+          },
+        },
+        {
+          $lookup: {
+            from: "batches",
+            localField: "trainerBatchLinks.batch",
+            foreignField: "_id",
+            as: "trainerBatches",
+          },
+        },
+        {
+          $match: {
+            "trainerBatches.trainer": new mongoose.Types.ObjectId(
+              trainer as string
+            ),
+          },
+        }
+      );
+    }
+
+    // 5. Pagination and Facet
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
@@ -123,6 +152,8 @@ export const getAllStudents = async (req: Request, res: Response) => {
             $project: {
               batchLinks: 0,
               courseLinks: 0,
+              trainerBatchLinks: 0,
+              trainerBatches: 0,
               password: 0,
               __v: 0,
             },
