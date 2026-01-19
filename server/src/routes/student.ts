@@ -7,6 +7,7 @@ import {
   deleteStudent,
 } from "../controllers/student.js";
 import { adminAuthenticator } from "../middlewares/adminAuthenticator.js";
+import { admintrainerAuthenticator } from "../middlewares/admintrainerAuthenticator.js";
 
 import { upload } from "../middlewares/multer.js";
 
@@ -18,8 +19,12 @@ studentRouter.post(
   upload.single("profilePicture"),
   createStudent
 );
-studentRouter.get("/getAllStudents", adminAuthenticator, getAllStudents);
-studentRouter.get("/getStudentById/:id", adminAuthenticator, getStudentById);
+studentRouter.get("/getAllStudents", admintrainerAuthenticator, getAllStudents);
+studentRouter.get(
+  "/getStudentById/:id",
+  admintrainerAuthenticator,
+  getStudentById
+);
 studentRouter.put(
   "/updateStudent/:id",
   adminAuthenticator,
