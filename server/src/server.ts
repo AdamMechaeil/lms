@@ -1,4 +1,6 @@
+import "./config/env.js";
 import http from "http";
+
 import { Server } from "socket.io";
 import { app } from "./app.js";
 import { initializeSocket } from "./socketHandler.js";

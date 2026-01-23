@@ -3,7 +3,6 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import compression from "compression";
-import dotenv from "dotenv";
 import path from "path";
 // import { fileURLToPath } from "url"; // Removed
 
@@ -24,7 +23,7 @@ import chatRouter from "./routes/chatRoutes.js";
 // const __filename = fileURLToPath(import.meta.url); // Removed
 // const __dirname = path.dirname(__filename); // Removed
 
-dotenv.config({ path: path.resolve(process.cwd(), "src/config/config.env") });
+// dotenv.config({ path: path.resolve(process.cwd(), "src/config/config.env") }); // Moved to server.ts
 
 export const app = express();
 
@@ -50,7 +49,7 @@ app.use(
       "http://localhost:3001",
     ], // Adjust as needed
     credentials: true,
-  })
+  }),
 );
 app.use(cookieParser());
 app.use(morgan("combined"));

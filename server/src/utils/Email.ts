@@ -8,14 +8,14 @@ const resend = new Resend(process.env.RESEND_API_KEY || "re_123");
 export async function sendWelcomeEmail(
   userEmail: string,
   userName: string,
-  password: string
+  password: string,
 ) {
   // 1. Read the template file
   const templatePath = path.join(
     process.cwd(),
     "src",
     "views",
-    "Studentwelcome.hbs"
+    "Studentwelcome.hbs",
   );
   const source = fs.readFileSync(templatePath, "utf8");
 
@@ -32,7 +32,7 @@ export async function sendWelcomeEmail(
   // 4. Send using Resend
   try {
     const data = await resend.emails.send({
-      from: "Onboarding <onboarding@simplyclever.com>",
+      from: "Onboarding <onboarding@resend.dev>",
       to: userEmail,
       subject: "Welcome to the SimplyClever!",
       html: htmlToSend, // Pass the compiled HTML here
