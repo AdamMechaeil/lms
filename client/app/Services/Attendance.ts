@@ -1,8 +1,10 @@
 import AxiosInstance from "../Utils/AxiosInstance";
 
-export const MARK_BATCH_ATTENDANCE = "/attendance/markBatchAttendance";
-export const GET_BATCH_ATTENDANCE = "/attendance/getBatchAttendance";
-export const GET_STUDENT_ATTENDANCE = "/attendance/getStudentAttendance";
+import {
+  MARK_BATCH_ATTENDANCE,
+  GET_BATCH_ATTENDANCE,
+  GET_STUDENT_ATTENDANCE,
+} from "../Utils/Constants/Attendance";
 
 export const markBatchAttendance = async (data: any) => {
   try {

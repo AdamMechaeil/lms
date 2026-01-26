@@ -13,6 +13,7 @@ import { VERIFY_TOKEN } from "../Utils/Constants/Auth";
 
 interface User {
   userId: string;
+  name?: string;
   email: string;
   role: string;
   verified: boolean;

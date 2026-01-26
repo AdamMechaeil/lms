@@ -306,13 +306,30 @@ export const getBatchesByStudent = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Student ID is required" });
     }
 
-    const batches = await StudentBatchLinkModel.find({ student: studentId })
+    // Resolve student ID if it's a custom ID
+    let studentObjId = studentId;
+    if (!studentId.match(/^[0-9a-fA-F]{24}$/)) {
+      const student = await StudentModel.findOne({ studentId: studentId });
+      if (student) {
+        studentObjId = student._id.toString();
+      } else {
+        console.log(`[DEBUG] Could not resolve Custom ID ${studentId}`);
+        return res.status(404).json({ message: "Student not found" });
+      }
+    } else {
+    }
+
+    const batches = await StudentBatchLinkModel.find({ student: studentObjId })
       .populate("batch")
       .populate({
         path: "batch",
         populate: [
           { path: "branch", select: "name" },
-          { path: "trainer", select: "name" },
+          {
+            path: "trainer",
+            select: "name domain",
+            populate: { path: "domain", select: "name" },
+          },
         ],
       });
 
@@ -338,9 +355,21 @@ export const removeStudentFromBatch = async (req: Request, res: Response) => {
       });
     }
 
+    // Try to find student by custom studentId first
+    let student = await StudentModel.findOne({ studentId: studentId });
+
+    // If not found, and it looks like an ID, try by _id
+    if (!student && studentId.match(/^[0-9a-fA-F]{24}$/)) {
+      student = await StudentModel.findById(studentId);
+    }
+
+    if (!student) {
+      return res.status(404).json({ error: "Student not found!" });
+    }
+
     const deletedLink = await StudentBatchLinkModel.findOneAndDelete({
       batch: batchId,
-      student: studentId,
+      student: student._id,
     });
 
     if (!deletedLink) {

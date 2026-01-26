@@ -16,6 +16,7 @@ import {
   updateTopic,
 } from "../controllers/coursesandtopics.js";
 import { adminAuthenticator } from "../middlewares/adminAuthenticator.js";
+import { commonAuthenticator } from "../middlewares/commonAuthenticator.js";
 
 const coursesandtopicsRouter = express.Router();
 ///// courses /////
@@ -24,17 +25,17 @@ coursesandtopicsRouter.get("/getAllCourses", adminAuthenticator, getAllCourses);
 coursesandtopicsRouter.get(
   "/getCourseById/:id",
   adminAuthenticator,
-  getCourseById
+  getCourseById,
 );
 coursesandtopicsRouter.put(
   "/updateCourse/:id",
   adminAuthenticator,
-  updateCourse
+  updateCourse,
 );
 coursesandtopicsRouter.delete(
   "/deleteCourse/:id",
   adminAuthenticator,
-  deleteCourse
+  deleteCourse,
 );
 
 ///// topics /////
@@ -44,13 +45,13 @@ coursesandtopicsRouter.get("/getAllTopics", adminAuthenticator, getAllTopics);
 coursesandtopicsRouter.get(
   "/getTopicById/:id",
   adminAuthenticator,
-  getTopicById
+  getTopicById,
 );
 coursesandtopicsRouter.put("/updateTopic/:id", adminAuthenticator, updateTopic);
 coursesandtopicsRouter.delete(
   "/deleteTopic/:id",
   adminAuthenticator,
-  deleteTopic
+  deleteTopic,
 );
 
 ///// courses and topics links /////
@@ -58,24 +59,24 @@ coursesandtopicsRouter.delete(
 coursesandtopicsRouter.post(
   "/assignTopicsToCourse",
   adminAuthenticator,
-  assignTopicsToCourse
+  assignTopicsToCourse,
 );
 coursesandtopicsRouter.get(
   "/getCourseTopics/:id",
   adminAuthenticator,
-  getCourseTopics
+  getCourseTopics,
 );
 
 coursesandtopicsRouter.post(
   "/assignCourseToStudent",
   adminAuthenticator,
-  assignCourseToStudent
+  assignCourseToStudent,
 );
 
 coursesandtopicsRouter.get(
   "/getCoursesByStudent/:id",
-  adminAuthenticator,
-  getCoursesByStudent
+  commonAuthenticator,
+  getCoursesByStudent,
 );
 
 export default coursesandtopicsRouter;
