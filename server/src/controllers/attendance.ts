@@ -96,6 +96,8 @@ export const getStudentAttendance = async (req: Request, res: Response) => {
       .populate("batchId", "title")
       .populate("trainerId", "name");
 
+    // console.log("Attendance history found:", history.length);
+
     // Flatten the response for frontend convenience
     const formattedHistory = history.map((doc) => ({
       _id: doc._id,
@@ -107,6 +109,7 @@ export const getStudentAttendance = async (req: Request, res: Response) => {
 
     res.status(200).json({ success: true, data: formattedHistory });
   } catch (error) {
+    console.error("Error in getStudentAttendance:", error);
     res.status(500).json({
       success: false,
       message: "Error fetching student history",
@@ -119,7 +122,7 @@ export const getStudentAttendance = async (req: Request, res: Response) => {
 
 export const getTrainerAttendanceHistory = async (
   req: Request,
-  res: Response
+  res: Response,
 ) => {
   try {
     const {

@@ -32,7 +32,7 @@ export async function adminGoogleLogin(req: Request, res: Response) {
           .json({ message: "Unauthorized! You are not an Admin." });
       }
       const admin = await import("../models/admin.js").then((m) =>
-        m.default.findOne({ email: isEmailExist._id })
+        m.default.findOne({ email: isEmailExist._id }),
       );
 
       const jwtToken = jwt.sign(
@@ -40,7 +40,7 @@ export async function adminGoogleLogin(req: Request, res: Response) {
         process.env.JWT_SECRET as string,
         {
           expiresIn: "9h",
-        }
+        },
       );
 
       res.cookie("accessToken", jwtToken, {
@@ -97,7 +97,7 @@ export async function trainerGoogleLogin(req: Request, res: Response) {
         process.env.JWT_SECRET as string,
         {
           expiresIn: "9h",
-        }
+        },
       );
 
       res.cookie("accessToken", jwtToken, {
@@ -132,7 +132,7 @@ export async function connectGoogle(req: Request, res: Response) {
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      process.env.GOOGLE_REDIRECT_URI
+      process.env.GOOGLE_REDIRECT_URI,
     );
 
     const { tokens } = await oauth2Client.getToken(code);
@@ -177,11 +177,11 @@ export async function studentLogin(req: Request, res: Response) {
         return res.status(401).json({ message: "Unauthorized" });
       }
       const token = jwt.sign(
-        { email: student.email, role: "student" },
+        { email: student.email, role: "student", userId: student._id },
         process.env.JWT_SECRET as string,
         {
           expiresIn: "9h",
-        }
+        },
       );
 
       res.cookie("accessToken", token, {
@@ -191,9 +191,14 @@ export async function studentLogin(req: Request, res: Response) {
         maxAge: 9 * 60 * 60 * 1000, // 9 hours
       });
 
-      return res
-        .status(200)
-        .json({ message: "Login successful", role: "student" });
+      return res.status(200).json({
+        message: "Login successful",
+        role: "student",
+        userId: student._id,
+        name: student.name,
+        email: student.email,
+        verified: true,
+      });
     }
   } catch (error) {
     console.log(error);
@@ -213,13 +218,14 @@ export async function updateStudentPassword(req: Request, res: Response) {
       return res.status(401).json({ message: "Unauthorized" });
     }
     student.password = await bcrypt.hash(newPassword, 10);
+    student.firstLogin = false;
     await student.save();
     const token = jwt.sign(
-      { email: student.email, role: "student" },
+      { email: student.email, role: "student", userId: student._id },
       process.env.JWT_SECRET as string,
       {
         expiresIn: "9h",
-      }
+      },
     );
     return res.status(200).json({ token });
   } catch (error) {
@@ -241,7 +247,7 @@ export async function verifyToken(req: Request, res: Response) {
 
     const decodedToken: any = jwt.verify(
       token,
-      process.env.JWT_SECRET as string
+      process.env.JWT_SECRET as string,
     );
     return res.status(200).json({
       role: decodedToken.role,

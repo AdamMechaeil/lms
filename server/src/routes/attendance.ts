@@ -7,17 +7,30 @@ import {
 } from "../controllers/attendance.js";
 import { admintrainerAuthenticator } from "../middlewares/admintrainerAuthenticator.js";
 
+import { commonAuthenticator } from "../middlewares/commonAuthenticator.js";
+
 const attendanceRouter = express.Router();
 
-// Apply authenticator to all routes
-attendanceRouter.use(admintrainerAuthenticator);
-
-attendanceRouter.post("/markBatchAttendance", markBatchAttendance);
-attendanceRouter.get("/getBatchAttendance", getBatchAttendance);
-attendanceRouter.get("/getStudentAttendance", getStudentAttendance);
+// Apply authenticator to specific routes
+attendanceRouter.post(
+  "/markBatchAttendance",
+  admintrainerAuthenticator,
+  markBatchAttendance,
+);
+attendanceRouter.get(
+  "/getBatchAttendance",
+  admintrainerAuthenticator,
+  getBatchAttendance,
+);
+attendanceRouter.get(
+  "/getStudentAttendance",
+  commonAuthenticator,
+  getStudentAttendance,
+);
 attendanceRouter.get(
   "/getTrainerAttendanceHistory",
-  getTrainerAttendanceHistory
+  admintrainerAuthenticator,
+  getTrainerAttendanceHistory,
 ); // New Route
 
 export default attendanceRouter;

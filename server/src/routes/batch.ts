@@ -13,6 +13,7 @@ import {
 } from "../controllers/batch.js";
 import { admintrainerAuthenticator } from "../middlewares/admintrainerAuthenticator.js";
 import { adminAuthenticator } from "../middlewares/adminAuthenticator.js";
+import { commonAuthenticator } from "../middlewares/commonAuthenticator.js";
 
 const batchRouter = express.Router();
 
@@ -24,31 +25,31 @@ batchRouter.delete("/deleteBatch/:id", adminAuthenticator, deleteBatch);
 batchRouter.post(
   "/assignBatchToStudent",
   admintrainerAuthenticator,
-  assignBatchToStudent
+  assignBatchToStudent,
 );
 
 batchRouter.post(
   "/createBatchMeetLink",
   admintrainerAuthenticator,
-  createBatchMeetLink
+  createBatchMeetLink,
 );
 
 batchRouter.get(
   "/getBatchRecordings/:batchId",
   admintrainerAuthenticator,
-  getBatchRecordings
+  getBatchRecordings,
 );
 
 batchRouter.get(
   "/getBatchesByStudent/:studentId",
-  admintrainerAuthenticator,
-  getBatchesByStudent
+  commonAuthenticator,
+  getBatchesByStudent,
 );
 
 batchRouter.delete(
   "/removeStudentFromBatch",
   admintrainerAuthenticator,
-  removeStudentFromBatch
+  removeStudentFromBatch,
 );
 
 export default batchRouter;

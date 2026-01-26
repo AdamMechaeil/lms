@@ -44,7 +44,7 @@ export const createStudent = async (req: Request, res: Response) => {
     console.error("Error creating student:", error);
     if (req.file) {
       fs.unlinkSync(
-        `${process.cwd()}/assets/profilePicture/${req.file.filename as string}`
+        `${process.cwd()}/assets/profilePicture/${req.file.filename as string}`,
       );
     }
     res.status(500).send("Internal Server Error");
@@ -131,10 +131,10 @@ export const getAllStudents = async (req: Request, res: Response) => {
         {
           $match: {
             "trainerBatches.trainer": new mongoose.Types.ObjectId(
-              trainer as string
+              trainer as string,
             ),
           },
-        }
+        },
       );
     }
 
@@ -184,7 +184,7 @@ export const getAllStudents = async (req: Request, res: Response) => {
 export const getStudentById = async (req: Request, res: Response) => {
   try {
     const student = await StudentModel.findById(req.params.id).populate(
-      "branch"
+      "branch",
     );
     res.status(200).send(student);
   } catch (error) {
@@ -200,7 +200,7 @@ export const updateStudent = async (req: Request, res: Response) => {
     }
     const student = await StudentModel.findByIdAndUpdate(
       req.params.id,
-      updateData
+      updateData,
     );
     res.status(200).send("Updated Student Successfully");
   } catch (error) {
@@ -213,6 +213,60 @@ export const deleteStudent = async (req: Request, res: Response) => {
     const student = await StudentModel.findByIdAndDelete(req.params.id);
     res.status(200).send("Deleted Student Successfully");
   } catch (error) {
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+export const updateProfilePicture = async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).send("No file uploaded");
+    }
+
+    // Security: Ensure student can only update their own profile
+    // valid for Admin/Trainer too if they use this route, but primarily for Student
+    // (req as any).user is populated by commonAuthenticator
+    const requestUser = (req as any).user;
+    if (
+      requestUser.role === "student" &&
+      requestUser.userId !== req.params.id
+    ) {
+      return res.status(403).send("Unauthorized to update this profile");
+    }
+
+    // Find student to get old profile picture
+    const student = await StudentModel.findById(req.params.id);
+    if (!student) {
+      return res.status(404).send("Student not found");
+    }
+
+    // Delete old picture if it exists
+    if (student.profilePicture) {
+      const oldPath = `${process.cwd()}/assets/profilePicture/${student.profilePicture}`;
+      if (fs.existsSync(oldPath)) {
+        try {
+          fs.unlinkSync(oldPath);
+        } catch (err) {
+          console.error("Failed to delete old profile picture:", err);
+          // Continue with update even if delete fails
+        }
+      }
+    }
+
+    const updateData = {
+      profilePicture: req.file.filename,
+    };
+
+    await StudentModel.findByIdAndUpdate(req.params.id, updateData);
+
+    res.status(200).send("Profile picture updated successfully");
+  } catch (error) {
+    if (req.file) {
+      fs.unlinkSync(
+        `${process.cwd()}/assets/profilePicture/${req.file.filename}`,
+      );
+    }
+    console.error("Error updating profile picture:", error);
     res.status(500).send("Internal Server Error");
   }
 };

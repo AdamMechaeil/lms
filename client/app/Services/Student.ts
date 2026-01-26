@@ -5,6 +5,7 @@ import {
   GET_STUDENT_BY_ID,
   UPDATE_STUDENT,
   DELETE_STUDENT,
+  UPDATE_PROFILE_PICTURE,
 } from "../Utils/Constants/Student";
 
 export async function createStudent(data: FormData) {
@@ -57,5 +58,22 @@ export async function deleteStudent(id: string) {
     return response.data;
   } catch (error: any) {
     throw error.response?.data?.message || "Failed to delete student";
+  }
+}
+
+export async function updateStudentProfilePicture(id: string, data: FormData) {
+  try {
+    const response = await AxiosInstance.put(
+      `${UPDATE_PROFILE_PICTURE}/${id}`,
+      data,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data?.message || "Failed to update profile picture";
   }
 }

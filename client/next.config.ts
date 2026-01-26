@@ -21,6 +21,18 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react"],
   },
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: "http://localhost:8000/api/:path*",
+      },
+      {
+        source: "/assets/:path*",
+        destination: "http://localhost:8000/assets/:path*",
+      },
+    ];
+  },
 };
 
 export default nextConfig;
