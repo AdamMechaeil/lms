@@ -22,7 +22,10 @@ import {
   Zap,
   Copy,
   ExternalLink,
+  ChevronDown,
+  UserCheck,
 } from "lucide-react";
+import BatchAttendance from "./BatchAttendance";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -77,6 +80,9 @@ export default function BatchDetails({ batchId }: { batchId: string }) {
   // Add Student State
   const [studentIdInput, setStudentIdInput] = useState("");
   const [addingStudent, setAddingStudent] = useState(false);
+
+  // Attendance Section State
+  const [isAttendanceExpanded, setIsAttendanceExpanded] = useState(false);
 
   const handleAddStudent = async () => {
     if (!studentIdInput.trim()) {
@@ -466,6 +472,47 @@ export default function BatchDetails({ batchId }: { batchId: string }) {
           </GlassCard>
         </div>
       </div>
+
+      {/* Attendance Section - Full Width */}
+      <GlassCard className="overflow-hidden">
+        <button
+          onClick={() => setIsAttendanceExpanded(!isAttendanceExpanded)}
+          className="w-full p-6 flex items-center justify-between text-left hover:bg-neutral-50/50 dark:hover:bg-white/5 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+              <UserCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold">Attendance</h2>
+              <p className="text-sm text-muted-foreground">
+                Mark attendance for all students in this batch
+              </p>
+            </div>
+          </div>
+          <ChevronDown
+            className={`w-5 h-5 text-muted-foreground transition-transform duration-300 ${
+              isAttendanceExpanded ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+
+        <motion.div
+          initial={false}
+          animate={{
+            height: isAttendanceExpanded ? "auto" : 0,
+            opacity: isAttendanceExpanded ? 1 : 0,
+          }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="overflow-hidden"
+        >
+          <div className="p-6 pt-0 border-t border-neutral-100 dark:border-white/5 mt-2">
+            <div className="pt-6">
+              <BatchAttendance batchId={batchId} />
+            </div>
+          </div>
+        </motion.div>
+      </GlassCard>
     </div>
   );
 }

@@ -15,11 +15,20 @@ import {
 } from "lucide-react";
 import { Input } from "@/app/Components/ui/input";
 import { Button } from "@/app/Components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/app/Components/ui/select";
 import { motion } from "framer-motion";
 
 export default function MyStudents() {
   const { user } = useAuth();
   const [students, setStudents] = useState<any[]>([]);
+  const [batches, setBatches] = useState<any[]>([]);
+  const [selectedBatch, setSelectedBatch] = useState<string>("all");
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -28,44 +37,56 @@ export default function MyStudents() {
       user &&
       ((user as any)._id || (user as any).id || (user as any).userId)
     ) {
-      fetchMyStudents();
+      fetchInitialData();
     }
   }, [user]);
 
-  const fetchMyStudents = async () => {
+  useEffect(() => {
+    if (
+      user &&
+      ((user as any)._id || (user as any).id || (user as any).userId)
+    ) {
+      fetchStudents();
+    }
+  }, [selectedBatch, user]);
+
+  const fetchInitialData = async () => {
+    try {
+      const trainerId =
+        (user as any)._id || (user as any).id || (user as any).userId;
+      if (!trainerId) return;
+
+      // Fetch Trainer's Batches for Filter
+      const batchesData = await getAllBatches({
+        trainer: trainerId,
+        limit: 100,
+        status: "Running", // Optional: maybe we want all batches
+      });
+      setBatches(batchesData.data || []);
+    } catch (error) {
+      console.error("Failed to fetch batches", error);
+    }
+  };
+
+  const fetchStudents = async () => {
     setLoading(true);
     try {
       const trainerId =
         (user as any)._id || (user as any).id || (user as any).userId;
       if (!trainerId) return;
 
-      // 1. Fetch Trainer's Batches
-      const batchParams: any = {
-        trainer: trainerId,
-        limit: 100,
+      const params: any = {
+        limit: 1000,
+        trainer: trainerId, // Always filter by trainer
       };
-      const batchesData = await getAllBatches(batchParams);
-      const myBatchIds = batchesData.data.map((b: any) => b._id);
 
-      // 2. Fetch All Students (Optimized: If API supported batch filter we'd use it. For now, client-side filter)
-      // Ideally, the backend should provide getStudentsByTrainer w endpoint.
-      // We will fetch all students and filter by enrolled batches.
-      const studentParams: any = {
-        limit: 1000, // Fetch ample students to filter
-      };
-      const studentsData = await getAllStudents(studentParams);
+      if (selectedBatch && selectedBatch !== "all") {
+        params.batch = selectedBatch;
+      }
 
-      // 3. Filter Unique Students belonging to my batches
-      // Assuming student has 'enrolledBatches' array of objects or strings
-      const filteredStudents = studentsData.data.filter((student: any) => {
-        if (!student.enrolledBatches) return false;
-        // Check if any of student's enrolled batches matches my batch IDs
-        return student.enrolledBatches.some((b: any) =>
-          myBatchIds.includes(typeof b === "string" ? b : b._id),
-        );
-      });
-
-      setStudents(filteredStudents);
+      // Fetch Students with backend filter
+      const studentsData = await getAllStudents(params);
+      setStudents(studentsData.data || []);
     } catch (error) {
       console.error("Failed to fetch students:", error);
     } finally {
@@ -99,14 +120,31 @@ export default function MyStudents() {
             View students enrolled in your batches
           </p>
         </div>
-        <div className="relative w-full sm:w-80 group">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-          <Input
-            placeholder="Search students..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-11 bg-white/50 dark:bg-black/20 backdrop-blur-sm border-neutral-200 dark:border-white/10 focus:ring-2 focus:ring-primary/20 transition-all"
-          />
+        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          <div className="w-full sm:w-48">
+            <Select value={selectedBatch} onValueChange={setSelectedBatch}>
+              <SelectTrigger className="bg-white/50 dark:bg-black/20 backdrop-blur-sm border-neutral-200 dark:border-white/10 h-11">
+                <SelectValue placeholder="All Batches" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Batches</SelectItem>
+                {batches.map((batch) => (
+                  <SelectItem key={batch._id} value={batch._id}>
+                    {batch.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="relative w-full sm:w-80 group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+            <Input
+              placeholder="Search students..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-11 bg-white/50 dark:bg-black/20 backdrop-blur-sm border-neutral-200 dark:border-white/10 focus:ring-2 focus:ring-primary/20 transition-all"
+            />
+          </div>
         </div>
       </div>
 
