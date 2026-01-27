@@ -3,9 +3,25 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/app/Context/Authcontext";
 import { getBatchesByStudent } from "@/app/Services/Batch";
-import { Loader2, Layers, Calendar, Clock, Video, User } from "lucide-react";
+import {
+  Loader2,
+  Layers,
+  Calendar,
+  Clock,
+  Video,
+  User,
+  MessageCircle,
+} from "lucide-react";
 import { GlassCard } from "@/app/Components/ui/glass-card";
 import { Button } from "@/app/Components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/app/Components/ui/dialog";
+import BatchChat from "../../Shared/BatchChat";
 
 export default function Batches() {
   const { user, isLoading: authLoading } = useAuth();
@@ -155,6 +171,32 @@ export default function Batches() {
                       No Meeting Link
                     </Button>
                   )}
+
+                  {/* Chat Button with Modal */}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full md:w-auto flex items-center gap-2"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        Chat with Batch
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl h-[80vh] overflow-hidden flex flex-col">
+                      <DialogHeader>
+                        <DialogTitle>
+                          {batch.name || batch.title} - Chat
+                        </DialogTitle>
+                      </DialogHeader>
+                      <div className="flex-1 overflow-hidden mt-2">
+                        <BatchChat
+                          batchId={batch._id}
+                          className="h-full border-0"
+                        />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
             </GlassCard>

@@ -11,11 +11,12 @@ import { toast } from "sonner";
 
 const AddStudentToBatchModal = dynamic(
   () => import("./AddStudentToBatchModal"),
-  { ssr: false }
+  { ssr: false },
 );
 
 interface BatchStudentsProps {
   batchId: string;
+  branchId?: string;
 }
 
 interface Student {
@@ -71,7 +72,7 @@ export default function BatchStudents({
   const filteredStudents = students.filter(
     (student) =>
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.studentId.toLowerCase().includes(searchTerm.toLowerCase())
+      student.studentId.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
