@@ -24,8 +24,10 @@ import {
   ExternalLink,
   ChevronDown,
   UserCheck,
+  MessageCircle,
 } from "lucide-react";
 import BatchAttendance from "./BatchAttendance";
+import BatchChat from "../../Shared/BatchChat";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -83,6 +85,9 @@ export default function BatchDetails({ batchId }: { batchId: string }) {
 
   // Attendance Section State
   const [isAttendanceExpanded, setIsAttendanceExpanded] = useState(false);
+
+  // Chat Section State
+  const [isChatExpanded, setIsChatExpanded] = useState(false);
 
   const handleAddStudent = async () => {
     if (!studentIdInput.trim()) {
@@ -509,6 +514,47 @@ export default function BatchDetails({ batchId }: { batchId: string }) {
           <div className="p-6 pt-0 border-t border-neutral-100 dark:border-white/5 mt-2">
             <div className="pt-6">
               <BatchAttendance batchId={batchId} />
+            </div>
+          </div>
+        </motion.div>
+      </GlassCard>
+
+      {/* Chat Section - Full Width */}
+      <GlassCard className="overflow-hidden">
+        <button
+          onClick={() => setIsChatExpanded(!isChatExpanded)}
+          className="w-full p-6 flex items-center justify-between text-left hover:bg-neutral-50/50 dark:hover:bg-white/5 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+              <MessageCircle className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold">Batch Chat</h2>
+              <p className="text-sm text-muted-foreground">
+                Ask doubts, share updates, and discuss with students
+              </p>
+            </div>
+          </div>
+          <ChevronDown
+            className={`w-5 h-5 text-muted-foreground transition-transform duration-300 ${
+              isChatExpanded ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+
+        <motion.div
+          initial={false}
+          animate={{
+            height: isChatExpanded ? "auto" : 0,
+            opacity: isChatExpanded ? 1 : 0,
+          }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="overflow-hidden"
+        >
+          <div className="p-6 pt-0 border-t border-neutral-100 dark:border-white/5 mt-2">
+            <div className="pt-6">
+              <BatchChat batchId={batchId} />
             </div>
           </div>
         </motion.div>

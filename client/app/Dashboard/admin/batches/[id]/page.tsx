@@ -12,6 +12,7 @@ import {
   Edit,
   Trash2,
   BookOpen,
+  MessageCircle,
 } from "lucide-react";
 import { getBatchById, deleteBatch } from "@/app/Services/Batch";
 import { toast } from "sonner";
@@ -21,31 +22,34 @@ import { Button } from "@/app/Components/ui/button";
 // Dynamic Imports for Performance
 const BatchOverview = dynamic(
   () => import("@/app/Components/Dashboard/Admin/Batch/BatchOverview"),
-  { ssr: false }
+  { ssr: false },
 );
 const BatchStudents = dynamic(
   () => import("@/app/Components/Dashboard/Admin/Batch/BatchStudents"),
-  { ssr: false }
+  { ssr: false },
 );
 const BatchAttendance = dynamic(
   () => import("@/app/Components/Dashboard/Admin/Batch/BatchAttendance"),
-  { ssr: false }
+  { ssr: false },
 );
 const BatchRecordings = dynamic(
   () => import("@/app/Components/Dashboard/Admin/Batch/BatchRecordings"),
-  { ssr: false }
+  { ssr: false },
 );
 const BatchMaterials = dynamic(
   () => import("@/app/Components/Dashboard/Admin/Batch/BatchMaterials"),
-  { ssr: false }
+  { ssr: false },
 );
 const AddBatchModal = dynamic(
   () => import("@/app/Components/Dashboard/Admin/AddBatchModal"),
-  { ssr: false }
+  { ssr: false },
 );
+const BatchChat = dynamic(() => import("@/app/Components/Shared/BatchChat"), {
+  ssr: false,
+});
 const ConfirmationModal = dynamic(
   () => import("@/app/Components/Dashboard/Admin/ConfirmationModal"),
-  { ssr: false }
+  { ssr: false },
 );
 
 export default function BatchDetailPage() {
@@ -106,6 +110,7 @@ export default function BatchDetailPage() {
     { id: "attendance", label: "Attendance", icon: CalendarCheck },
     { id: "materials", label: "Materials", icon: BookOpen },
     { id: "recordings", label: "Recordings", icon: Video },
+    { id: "chat", label: "Chat", icon: MessageCircle },
   ];
 
   return (
@@ -226,6 +231,15 @@ export default function BatchDetailPage() {
             transition={{ duration: 0.2 }}
           >
             <BatchRecordings batchId={batch._id} />
+          </motion.div>
+        )}
+        {activeTab === "chat" && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <BatchChat batchId={batch._id} />
           </motion.div>
         )}
       </div>

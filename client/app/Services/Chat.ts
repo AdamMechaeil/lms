@@ -1,21 +1,28 @@
 import AxiosInstance from "../Utils/AxiosInstance";
-import { GET_BATCH_MESSAGES, UPLOAD_CHAT_MEDIA } from "../Utils/Constants/Chat";
 
-export async function getBatchMessages(batchId: string) {
+const BASE_URL = "/api/v1/chat";
+
+export async function getBatchMessages(
+  batchId: string,
+  page: number = 1,
+  limit: number = 50,
+) {
   try {
-    // Replace :batchId in the constant or construct URL dynamically
-    // The constant is "/chat/:batchId/messages"
-    const url = GET_BATCH_MESSAGES.replace(":batchId", batchId);
-    const response = await AxiosInstance.get(url);
+    const response = await AxiosInstance.get(
+      `${BASE_URL}/${batchId}/messages`,
+      {
+        params: { page, limit },
+      },
+    );
     return response.data;
   } catch (error: any) {
     throw error.response?.data?.message || "Failed to fetch messages";
   }
 }
 
-export async function uploadChatMedia(data: FormData) {
+export async function uploadChatMedia(formData: FormData) {
   try {
-    const response = await AxiosInstance.post(UPLOAD_CHAT_MEDIA, data, {
+    const response = await AxiosInstance.post(`${BASE_URL}/upload`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

@@ -17,21 +17,23 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // 1. Only connect if user exists AND is a trainer
-    if (user && user.role.toLowerCase() === "trainer") {
+    // 1. Connect if user exists (ALL roles: Student, Trainer, Admin)
+    if (user) {
       const socketInstance = io(
         process.env.NEXT_PUBLIC_DEV_BASE_URL || "http://localhost:8000",
         {
           withCredentials: true, // Important for cookies/session
-        }
+        },
       );
 
       socketInstance.on("connect", () => {
         setIsConnected(true);
         console.log("Socket connected:", socketInstance.id);
 
-        // 2. Immediately join session with trainerId
-        socketInstance.emit("join_session", { trainerId: user.userId });
+        // 2. Trainer Specific: Join session for tracking
+        if (user.role.toLowerCase() === "trainer") {
+          socketInstance.emit("join_session", { trainerId: user.userId });
+        }
       });
 
       socketInstance.on("disconnect", () => {
@@ -41,9 +43,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
       setSocket(socketInstance);
 
-      // 3. Heartbeat interval
+      // 3. Heartbeat interval (Only for Trainers)
       const heartbeatInterval = setInterval(() => {
-        if (socketInstance.connected) {
+        if (socketInstance.connected && user.role.toLowerCase() === "trainer") {
           socketInstance.emit("heartbeat", { trainerId: user.userId });
         }
       }, 30000); // 30 seconds
@@ -55,7 +57,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         setIsConnected(false);
       };
     } else {
-      // If user logs out or is not trainer, ensure socket is closed
+      // If user logs out, ensure socket is closed
       if (socket) {
         socket.disconnect();
         setSocket(null);
