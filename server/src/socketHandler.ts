@@ -1,11 +1,22 @@
 import { Server as SocketIOServer, Socket } from "socket.io";
 import MessageModel from "./models/Message.js";
 import TrainerSessionModel from "./models/trainerSession.js";
+import StudentBatchLinkModel from "./models/studentbatchlink.js";
 
 // In-memory mapping of SocketID -> SessionID (Single-Server solution)
 const activeSessions = new Map<string, string>();
 
+let ioInstance: SocketIOServer;
+
+export const getIO = () => {
+  if (!ioInstance) {
+    throw new Error("Socket.io not initialized!");
+  }
+  return ioInstance;
+};
+
 export const initializeSocket = (io: SocketIOServer) => {
+  ioInstance = io;
   io.on("connection", (socket: Socket) => {
     console.log("New client connected:", socket.id);
 
@@ -47,12 +58,44 @@ export const initializeSocket = (io: SocketIOServer) => {
         // Map socket to this session ID
         activeSessions.set(socket.id, session._id.toString());
         console.log(
-          `Session Active for Trainer ${trainerId} (Socket: ${socket.id})`
+          `Session Active for Trainer ${trainerId} (Socket: ${socket.id})`,
         );
       } catch (error) {
         console.error("Error handling join_session:", error);
       }
     });
+
+    // --- NOTIFICATION LOGIC ---
+    // --- NOTIFICATION LOGIC ---
+    socket.on(
+      "join_notifications",
+      async (data: { userId: string; role: string }) => {
+        const { userId, role } = data;
+        if (!userId) return;
+
+        socket.join(`user_${userId}`);
+        console.log(`User ${userId} joined notification room user_${userId}`);
+
+        if (role) {
+          socket.join(`role_${role}`);
+        }
+
+        // If Student, join their batch rooms to receive Batch Notifications
+        if (role && role.toLowerCase() === "student") {
+          try {
+            // We need to use dynamic import or ensure Model is loaded if ESM issues arise,
+            // but since we imported it at top level, it should be fine.
+            const links = await StudentBatchLinkModel.find({ student: userId });
+            links.forEach((link) => {
+              socket.join(`batch_${link.batch}`);
+              console.log(`Student ${userId} joined batch_${link.batch}`);
+            });
+          } catch (error) {
+            console.error("Error joining batch rooms for student:", error);
+          }
+        }
+      },
+    );
 
     // --- CHAT LOGIC ---
     socket.on("join_chat", (data: { batchId: string; user: any }) => {
@@ -101,7 +144,7 @@ export const initializeSocket = (io: SocketIOServer) => {
         } catch (error) {
           console.error("Error sending message:", error);
         }
-      }
+      },
     );
 
     // --- HEARTBEAT ---
