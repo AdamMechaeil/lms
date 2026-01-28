@@ -9,6 +9,8 @@ import {
   Globe,
   BookOpen,
   FileText,
+  Bell,
+  CalendarCheck,
 } from "lucide-react";
 
 export default function AdminLayout({
@@ -71,6 +73,20 @@ export default function AdminLayout({
       href: "/Dashboard/admin/domains",
       icon: (
         <Globe className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
+    },
+    {
+      label: "Notifications",
+      href: "/Dashboard/admin/notifications",
+      icon: (
+        <Bell className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
+    },
+    {
+      label: "Leaves",
+      href: "/Dashboard/admin/leaves",
+      icon: (
+        <CalendarCheck className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
   ];

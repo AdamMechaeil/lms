@@ -7,6 +7,7 @@ import {
   ClipboardCheck,
   GraduationCap,
   BookOpen,
+  CalendarCheck,
 } from "lucide-react";
 
 export default function TrainerLayout({
@@ -48,6 +49,13 @@ export default function TrainerLayout({
       href: "/Dashboard/trainer/materials",
       icon: (
         <BookOpen className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
+    },
+    {
+      label: "Leaves",
+      href: "/Dashboard/trainer/leaves",
+      icon: (
+        <CalendarCheck className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
   ];
