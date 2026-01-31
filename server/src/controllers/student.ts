@@ -4,30 +4,27 @@ import crypto from "crypto";
 import mongoose from "mongoose";
 import { sendWelcomeEmail } from "../utils/Email.js";
 import StudentModel from "../models/student.js";
-import fs from "fs";
+import CounterModel from "../models/counter.js";
+import { deleteFromS3 } from "../utils/s3.js";
 export const createStudent = async (req: Request, res: Response) => {
   try {
     const { name, email } = req.body;
     const year = new Date().getFullYear();
     const prefix = `STU${year}`;
-    const lastStudent = await StudentModel.findOne({
-      studentId: { $regex: `^${prefix}` },
-    }).sort({ studentId: -1 });
+    const counter = await CounterModel.findOneAndUpdate(
+      { id: "studentId" },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true },
+    );
 
-    let newSerial = 1;
-    if (lastStudent && lastStudent.studentId) {
-      const lastSerial = parseInt(lastStudent.studentId.replace(prefix, ""));
-      if (!isNaN(lastSerial)) {
-        newSerial = lastSerial + 1;
-      }
-    }
-
-    const serialString = newSerial.toString().padStart(4, "0");
+    const serialString = counter.seq.toString().padStart(4, "0");
     const studentId = `${prefix}${serialString}`;
-    const plainPassword = crypto.randomBytes(4).toString("hex"); // 8 chars hex
+    const plainPassword = crypto.randomBytes(4).toString("hex");
     const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
-    const profilePicture = req.file ? req.file.filename : undefined;
+    const profilePicture = req.file
+      ? (req.file as any).location || req.file.filename
+      : undefined;
 
     const student = await StudentModel.create({
       ...req.body,
@@ -43,9 +40,8 @@ export const createStudent = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error creating student:", error);
     if (req.file) {
-      fs.unlinkSync(
-        `${process.cwd()}/assets/profilePicture/${req.file.filename as string}`,
-      );
+      const fileKey = (req.file as any).key || req.file.filename;
+      await deleteFromS3(fileKey);
     }
     res.status(500).send("Internal Server Error");
   }
@@ -58,7 +54,6 @@ export const getAllStudents = async (req: Request, res: Response) => {
     const pipeline: any[] = [];
     const matchStage: any = {};
 
-    // 1. Direct Filters (Branch & Search)
     if (branch) {
       matchStage.branch = new mongoose.Types.ObjectId(branch as string);
     }
@@ -70,12 +65,10 @@ export const getAllStudents = async (req: Request, res: Response) => {
       ];
     }
 
-    // Apply match stage if not empty
     if (Object.keys(matchStage).length > 0) {
       pipeline.push({ $match: matchStage });
     }
 
-    // 2. Filter by Batch (Requires Lookup)
     if (batch) {
       pipeline.push({
         $lookup: {
@@ -92,7 +85,6 @@ export const getAllStudents = async (req: Request, res: Response) => {
       });
     }
 
-    // 3. Filter by Course (Requires Lookup)
     if (course) {
       pipeline.push({
         $lookup: {
@@ -109,7 +101,6 @@ export const getAllStudents = async (req: Request, res: Response) => {
       });
     }
 
-    // 4. Filter by Trainer (Requires Multi-Level Lookup)
     if (trainer) {
       pipeline.push(
         {
@@ -138,7 +129,6 @@ export const getAllStudents = async (req: Request, res: Response) => {
       );
     }
 
-    // 5. Pagination and Facet
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
@@ -196,7 +186,8 @@ export const updateStudent = async (req: Request, res: Response) => {
   try {
     const updateData = { ...req.body };
     if (req.file) {
-      updateData.profilePicture = req.file.filename;
+      updateData.profilePicture =
+        (req.file as any).location || req.file.filename;
     }
     const student = await StudentModel.findByIdAndUpdate(
       req.params.id,
@@ -210,7 +201,16 @@ export const updateStudent = async (req: Request, res: Response) => {
 
 export const deleteStudent = async (req: Request, res: Response) => {
   try {
-    const student = await StudentModel.findByIdAndDelete(req.params.id);
+    const student = await StudentModel.findById(req.params.id);
+    if (!student) {
+      return res.status(404).send("Student not found");
+    }
+
+    if (student.profilePicture) {
+      await deleteFromS3(student.profilePicture);
+    }
+
+    await StudentModel.findByIdAndDelete(req.params.id);
     res.status(200).send("Deleted Student Successfully");
   } catch (error) {
     res.status(500).send("Internal Server Error");
@@ -242,19 +242,11 @@ export const updateProfilePicture = async (req: Request, res: Response) => {
 
     // Delete old picture if it exists
     if (student.profilePicture) {
-      const oldPath = `${process.cwd()}/assets/profilePicture/${student.profilePicture}`;
-      if (fs.existsSync(oldPath)) {
-        try {
-          fs.unlinkSync(oldPath);
-        } catch (err) {
-          console.error("Failed to delete old profile picture:", err);
-          // Continue with update even if delete fails
-        }
-      }
+      await deleteFromS3(student.profilePicture);
     }
 
     const updateData = {
-      profilePicture: req.file.filename,
+      profilePicture: (req.file as any).location || req.file.filename,
     };
 
     await StudentModel.findByIdAndUpdate(req.params.id, updateData);
@@ -262,9 +254,8 @@ export const updateProfilePicture = async (req: Request, res: Response) => {
     res.status(200).send("Profile picture updated successfully");
   } catch (error) {
     if (req.file) {
-      fs.unlinkSync(
-        `${process.cwd()}/assets/profilePicture/${req.file.filename}`,
-      );
+      const fileKey = (req.file as any).key || req.file.filename;
+      await deleteFromS3(fileKey);
     }
     console.error("Error updating profile picture:", error);
     res.status(500).send("Internal Server Error");

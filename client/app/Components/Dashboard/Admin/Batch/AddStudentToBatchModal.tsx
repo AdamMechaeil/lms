@@ -77,7 +77,7 @@ export default function AddStudentToBatchModal({
   const filteredStudents = students.filter(
     (student) =>
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.studentId.toLowerCase().includes(searchTerm.toLowerCase())
+      student.studentId.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   if (!isOpen) return null;
@@ -146,7 +146,7 @@ export default function AddStudentToBatchModal({
                         <div className="w-10 h-10 rounded-full bg-neutral-200 dark:bg-neutral-700 overflow-hidden flex-shrink-0">
                           {student.profilePicture && (
                             <img
-                              src={`${process.env.NEXT_PUBLIC_DEV_BASE_URL}/assets/profilePicture/${student.profilePicture}`}
+                              src={student.profilePicture}
                               alt={student.name}
                               className="w-full h-full object-cover"
                             />
@@ -184,6 +184,6 @@ export default function AddStudentToBatchModal({
         </>
       )}
     </AnimatePresence>,
-    document.body
+    document.body,
   );
 }

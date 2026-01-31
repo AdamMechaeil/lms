@@ -222,7 +222,7 @@ export default function Students() {
                   <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-white dark:border-neutral-800 shadow-lg">
                     {student.profilePicture ? (
                       <img
-                        src={`${process.env.NEXT_PUBLIC_DEV_BASE_URL}/assets/profilePicture/${student.profilePicture}`}
+                        src={student.profilePicture}
                         alt={student.name}
                         className="w-full h-full object-cover"
                       />
@@ -281,7 +281,7 @@ export default function Students() {
                       <DropdownMenuItem
                         onClick={() =>
                           router.push(
-                            `/Dashboard/admin/students/${student._id}`
+                            `/Dashboard/admin/students/${student._id}`,
                           )
                         }
                       >

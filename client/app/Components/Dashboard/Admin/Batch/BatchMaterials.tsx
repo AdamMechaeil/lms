@@ -100,7 +100,7 @@ export default function BatchMaterials({ batchId }: BatchMaterialsProps) {
               <div className="h-40 bg-neutral-100 dark:bg-neutral-800 rounded-lg flex items-center justify-center mb-4 overflow-hidden relative">
                 {material.type === "Image" ? (
                   <img
-                    src={`${process.env.NEXT_PUBLIC_DEV_BASE_URL}/assets/materials/${material.file}`}
+                    src={material.file}
                     alt={material.title}
                     className="w-full h-full object-cover"
                   />
@@ -113,7 +113,7 @@ export default function BatchMaterials({ batchId }: BatchMaterialsProps) {
                 {/* Overlay Actions */}
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <a
-                    href={`${process.env.NEXT_PUBLIC_DEV_BASE_URL}/assets/materials/${material.file}`}
+                    href={material.file}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-3 bg-white/20 backdrop-blur-sm rounded-full text-white hover:bg-white/30 transition-colors flex items-center gap-2 font-medium"

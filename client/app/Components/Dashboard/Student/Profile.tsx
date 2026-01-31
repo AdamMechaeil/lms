@@ -116,7 +116,7 @@ export default function Profile() {
             <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-secondary shadow-xl relative">
               {student.profilePicture ? (
                 <img
-                  src={`/assets/profilePicture/${student.profilePicture}`}
+                  src={student.profilePicture}
                   alt={student.name}
                   className="w-full h-full object-cover"
                   onError={(e: any) => {

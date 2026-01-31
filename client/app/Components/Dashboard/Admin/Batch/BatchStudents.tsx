@@ -118,7 +118,7 @@ export default function BatchStudents({
               <div className="relative w-12 h-12 rounded-full overflow-hidden border border-neutral-200 dark:border-neutral-700 flex-shrink-0">
                 {student.profilePicture ? (
                   <img
-                    src={`${process.env.NEXT_PUBLIC_DEV_BASE_URL}/assets/profilePicture/${student.profilePicture}`}
+                    src={student.profilePicture}
                     alt={student.name}
                     className="w-full h-full object-cover"
                   />

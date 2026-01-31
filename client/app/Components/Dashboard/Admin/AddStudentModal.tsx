@@ -77,9 +77,7 @@ export default function AddStudentModal({
           branch: initialData.branch?._id || initialData.branch,
         });
         if (initialData.profilePicture) {
-          setPreviewUrl(
-            `${process.env.NEXT_PUBLIC_DEV_BASE_URL}/assets/profilePicture/${initialData.profilePicture}`
-          );
+          setPreviewUrl(initialData.profilePicture);
         }
       } else {
         reset({
@@ -377,6 +375,6 @@ export default function AddStudentModal({
         </>
       )}
     </AnimatePresence>,
-    document.body
+    document.body,
   );
 }

@@ -10,19 +10,19 @@ import { cn } from "@/lib/utils";
 
 const StudentOverview = dynamic(
   () => import("@/app/Components/Dashboard/Admin/Student/StudentOverview"),
-  { ssr: false }
+  { ssr: false },
 );
 const StudentCourses = dynamic(
   () => import("@/app/Components/Dashboard/Admin/Student/StudentCourses"),
-  { ssr: false }
+  { ssr: false },
 );
 const StudentBatches = dynamic(
   () => import("@/app/Components/Dashboard/Admin/Student/StudentBatches"),
-  { ssr: false }
+  { ssr: false },
 );
 const StudentAttendance = dynamic(
   () => import("@/app/Components/Dashboard/Admin/Student/StudentAttendance"),
-  { ssr: false }
+  { ssr: false },
 );
 
 const TABS = [
@@ -89,7 +89,7 @@ export default function StudentDetailPage() {
             <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white dark:border-neutral-800 shadow-xl mb-4">
               {student.profilePicture ? (
                 <img
-                  src={`${process.env.NEXT_PUBLIC_DEV_BASE_URL}/assets/profilePicture/${student.profilePicture}`}
+                  src={student.profilePicture}
                   alt={student.name}
                   className="w-full h-full object-cover"
                 />
@@ -129,7 +129,7 @@ export default function StudentDetailPage() {
                   "px-4 py-2 text-sm font-medium transition-colors relative whitespace-nowrap",
                   activeTab === tab.id
                     ? "text-blue-600 dark:text-blue-400"
-                    : "text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-300"
+                    : "text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-300",
                 )}
               >
                 {tab.label}

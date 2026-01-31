@@ -2,13 +2,16 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import TrainerModel from "../models/trainer.js";
 import EmailModel from "../models/email.js";
-import fs from "fs";
+import { deleteFromS3 } from "../utils/s3.js";
 
 export async function createTrainer(req: Request, res: Response) {
   try {
     const { name, email, branch, domain, mobileNumber, designation, gender } =
       req.body;
-    const profilePicture = req.file ? req.file.filename : undefined;
+    // S3 returns the full URL in .location, fallback to .filename if using disk storage for some reason, though .location is preferred for S3
+    const profilePicture = req.file
+      ? (req.file as any).location || req.file.filename
+      : undefined;
     const addedEmail = await EmailModel.create({
       role: "Trainer",
       email,
@@ -28,9 +31,9 @@ export async function createTrainer(req: Request, res: Response) {
   } catch (error) {
     console.error(error);
     if (req.file) {
-      fs.unlinkSync(
-        `${process.cwd()}/assets/profilePicture/${req.file.filename as string}`
-      );
+      // Use the deleteFromS3 utility
+      const fileKey = (req.file as any).key || req.file.filename;
+      await deleteFromS3(fileKey);
     }
     res.status(500).json({ error: "Failed to create trainer" });
   }
@@ -81,7 +84,7 @@ export async function getAllTrainers(req: Request, res: Response) {
           as: "email",
         },
       },
-      { $unwind: "$email" }
+      { $unwind: "$email" },
     );
 
     const pageNumber = parseInt(page as string);
@@ -153,7 +156,8 @@ export async function updateTrainer(req: Request, res: Response) {
     const updateData: any = { ...otherData };
 
     if (req.file) {
-      updateData.profilePicture = req.file.filename;
+      updateData.profilePicture =
+        (req.file as any).location || req.file.filename;
     }
 
     // Find the trainer to get the Email ID
@@ -185,11 +189,19 @@ export async function updateTrainer(req: Request, res: Response) {
 export async function deleteTrainer(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const trainer = await TrainerModel.findByIdAndDelete(id);
-    await EmailModel.findByIdAndDelete(trainer?.email);
+    const trainer = await TrainerModel.findById(id);
     if (!trainer) {
       return res.status(404).json({ error: "Trainer not found" });
     }
+
+    // Delete profile picture from S3 if it exists
+    if (trainer.profilePicture) {
+      await deleteFromS3(trainer.profilePicture);
+    }
+
+    await TrainerModel.findByIdAndDelete(id);
+    await EmailModel.findByIdAndDelete(trainer.email);
+
     res.status(200).json(trainer);
   } catch (error) {
     console.error(error);

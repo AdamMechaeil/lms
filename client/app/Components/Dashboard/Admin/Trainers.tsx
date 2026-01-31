@@ -206,7 +206,7 @@ export default function Trainers() {
                 <div className="relative w-16 h-16 rounded-xl overflow-hidden shadow-md border-2 border-white/20">
                   {trainer.profilePicture ? (
                     <img
-                      src={`${process.env.NEXT_PUBLIC_DEV_BASE_URL}/assets/profilePicture/${trainer.profilePicture}`}
+                      src={trainer.profilePicture}
                       alt={trainer.name}
                       className="w-full h-full object-cover"
                     />

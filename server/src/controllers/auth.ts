@@ -6,6 +6,7 @@ import StudentModel from "../models/student.js";
 import bcrypt from "bcrypt";
 import { google } from "googleapis";
 import TrainerModel from "../models/trainer.js";
+import AdminModel from "../models/admin.js";
 
 export async function adminGoogleLogin(req: Request, res: Response) {
   try {
@@ -31,10 +32,7 @@ export async function adminGoogleLogin(req: Request, res: Response) {
           .status(401)
           .json({ message: "Unauthorized! You are not an Admin." });
       }
-      const admin = await import("../models/admin.js").then((m) =>
-        m.default.findOne({ email: isEmailExist._id }),
-      );
-
+      const admin = await AdminModel.findOne({ email: isEmailExist._id });
       const jwtToken = jwt.sign(
         { email, role: isEmailExist.role, userId: admin?._id },
         process.env.JWT_SECRET as string,

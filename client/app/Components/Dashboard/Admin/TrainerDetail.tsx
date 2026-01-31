@@ -93,8 +93,8 @@ export default function TrainerDetail({ trainerId }: TrainerDetailProps) {
   const [startDate, setStartDate] = useState(
     format(
       new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-      "yyyy-MM-dd"
-    )
+      "yyyy-MM-dd",
+    ),
   ); // First day of current month
   const [endDate, setEndDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [statusFilter, setStatusFilter] = useState("All");
@@ -192,7 +192,7 @@ export default function TrainerDetail({ trainerId }: TrainerDetailProps) {
             <div className="w-24 h-24 rounded-2xl bg-neutral-100 dark:bg-neutral-800 overflow-hidden relative shadow-inner">
               {trainer?.profilePicture ? (
                 <img
-                  src={`${process.env.NEXT_PUBLIC_DEV_BASE_URL}/assets/profilePicture/${trainer.profilePicture}`}
+                  src={trainer.profilePicture}
                   alt={trainer.name}
                   className="w-full h-full object-cover"
                 />
@@ -347,7 +347,7 @@ export default function TrainerDetail({ trainerId }: TrainerDetailProps) {
                         </div>
                         <span
                           className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                            record.status
+                            record.status,
                           )}`}
                         >
                           {record.status}

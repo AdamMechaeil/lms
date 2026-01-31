@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import MaterialModel from "../models/materials.js";
-import fs from "fs";
+import { deleteFromS3 } from "../utils/s3.js";
 import MaterialBatchLinkModel from "../models/materialbatchlink.js";
 export const createMaterial = async (req: Request, res: Response) => {
   try {
@@ -13,18 +13,22 @@ export const createMaterial = async (req: Request, res: Response) => {
       files.map(async (file) => {
         return await MaterialModel.create({
           ...req.body,
-          file: file.filename,
+          file: (file as any).location || file.filename,
         });
-      })
+      }),
     );
 
     res.status(201).json(createdMaterials);
   } catch (error) {
     console.error("Error creating material:", error);
     //@ts-ignore
-    req.files.forEach((file: Express.Multer.File) => {
-      fs.unlinkSync(`${process.cwd()}/assets/materials/${file.filename}`);
-    });
+    const files = req.files as Express.Multer.File[];
+    if (files) {
+      for (const file of files) {
+        const fileKey = (file as any).key || file.filename;
+        await deleteFromS3(fileKey);
+      }
+    }
     res.status(500).json({ error: "Failed to create material" });
   }
 };
@@ -76,7 +80,7 @@ export const updateMaterial = async (req: Request, res: Response) => {
     const material = await MaterialModel.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true }
+      { new: true },
     );
     if (!material) {
       return res.status(404).json({ error: "Material not found" });
@@ -90,10 +94,16 @@ export const updateMaterial = async (req: Request, res: Response) => {
 
 export const deleteMaterial = async (req: Request, res: Response) => {
   try {
-    const material = await MaterialModel.findByIdAndDelete(req.params.id);
+    const material = await MaterialModel.findById(req.params.id);
     if (!material) {
       return res.status(404).json({ error: "Material not found" });
     }
+
+    if (material.file) {
+      await deleteFromS3(material.file);
+    }
+
+    await MaterialModel.findByIdAndDelete(req.params.id);
     res.status(200).json(material);
   } catch (error) {
     console.error("Error deleting material:", error);
@@ -110,9 +120,9 @@ export const assignMaterialsToBatch = async (req: Request, res: Response) => {
         return await MaterialBatchLinkModel.findOneAndUpdate(
           { batch: batchId, material: materialId },
           { batch: batchId, material: materialId },
-          { upsert: true, new: true }
+          { upsert: true, new: true },
         );
-      })
+      }),
     );
     res
       .status(200)

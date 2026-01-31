@@ -105,7 +105,7 @@ export default function Materials() {
   const filteredMaterials = materials.filter(
     (m) =>
       m.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      m.description.toLowerCase().includes(searchTerm.toLowerCase())
+      m.description.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const getIcon = (type: string) => {
@@ -199,7 +199,7 @@ export default function Materials() {
               {/* Type Badge */}
               <div
                 className={`absolute top-4 right-4 px-2 py-1 rounded-full text-xs font-medium z-10 ${getTypeColor(
-                  material.type
+                  material.type,
                 )}`}
               >
                 {material.type}
@@ -209,7 +209,7 @@ export default function Materials() {
               <div className="h-40 bg-neutral-100 dark:bg-neutral-800 rounded-lg flex items-center justify-center mb-4 overflow-hidden relative">
                 {material.type === "Image" ? (
                   <img
-                    src={`${process.env.NEXT_PUBLIC_DEV_BASE_URL}/assets/materials/${material.file}`}
+                    src={material.file}
                     alt={material.title}
                     className="w-full h-full object-cover"
                   />
@@ -222,7 +222,7 @@ export default function Materials() {
                 {/* Overlay Actions */}
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                   <a
-                    href={`${process.env.NEXT_PUBLIC_DEV_BASE_URL}/assets/materials/${material.file}`}
+                    href={material.file}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-2 bg-white/20 backdrop-blur-sm rounded-full text-white hover:bg-white/30 transition-colors"

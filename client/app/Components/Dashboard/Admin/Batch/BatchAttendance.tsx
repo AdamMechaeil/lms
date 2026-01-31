@@ -47,7 +47,7 @@ export default function BatchAttendance({
   trainerId,
 }: BatchAttendanceProps) {
   const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split("T")[0],
   );
   const [students, setStudents] = useState<Student[]>([]);
   const [attendanceRecords, setAttendanceRecords] = useState<
@@ -121,7 +121,7 @@ export default function BatchAttendance({
         ([studentId, status]) => ({
           studentId,
           status,
-        })
+        }),
       );
 
       // Validate if all students marked? Maybe not strictly required but good UX.
@@ -217,7 +217,7 @@ export default function BatchAttendance({
                 <div className="relative w-10 h-10 rounded-full overflow-hidden border border-neutral-200 dark:border-neutral-700 flex-shrink-0">
                   {student.profilePicture ? (
                     <img
-                      src={`${process.env.NEXT_PUBLIC_DEV_BASE_URL}/assets/profilePicture/${student.profilePicture}`}
+                      src={student.profilePicture}
                       alt={student.name}
                       className="w-full h-full object-cover"
                     />

@@ -30,16 +30,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         setIsConnected(true);
         console.log("Socket connected:", socketInstance.id);
 
-        // 2. Join Notification Rooms (For All Users)
-        // This ensures they get "Individual", "AllTrainers", "AllStudents" alerts
-        // The server should handle joining `user_{id}` room upon this event or connection if possible,
-        // BUT better to emit an explicit join event if the server expects it.
-        // Looking at server socketHandler, it expects specific events?
-        // Wait, server logic I wrote says "io.on('connection'... socket.join('user_'+userId))"?
-        // I need to check socketHandler.ts on server again.
-        // Assuming I need to emit a join event or let server handle it from token?
-        // Let's emit a generic "join_app" or similar.
-        // Actually, let's just emit 'join_notifications'
         socketInstance.emit("join_notifications", {
           userId: user.userId,
           role: user.role,
@@ -79,7 +69,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         setIsConnected(false);
       }
     }
-  }, [user]); // Re-run when user changes (login/logout)
+  }, [user?.userId]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>
