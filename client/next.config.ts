@@ -29,11 +29,11 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "http://localhost:8000/api/:path*",
+        destination: `${process.env.SERVER_URL || "http://localhost:8000"}/api/:path*`,
       },
       {
         source: "/assets/:path*",
-        destination: "http://localhost:8000/assets/:path*",
+        destination: `${process.env.SERVER_URL || "http://localhost:8000"}/assets/:path*`,
       },
     ];
   },

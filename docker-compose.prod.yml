@@ -1,0 +1,32 @@
+
+
+services:
+  server:
+    build:
+      context: ./server
+      target: prod
+    container_name: lms-server-prod
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./server/src/config/config.env
+    environment:
+      - PORT=8000
+      - CLIENT_URL=http://localhost:3000
+    restart: always
+
+  client:
+    build:
+      context: ./client
+      target: prod
+    container_name: lms-client-prod
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./client/.env
+    environment:
+      - SERVER_URL=http://server:8000
+      - NEXT_PUBLIC_SERVER_URL=http://localhost:8000
+    depends_on:
+      - server
+    restart: always
