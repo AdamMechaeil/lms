@@ -5,7 +5,7 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "build": "tsc && npm run copy-assets",
+    "build": "tsc",
     "start": "node dist/server.js",
     "watch:ts": "tsc --watch",
     "watch:serve": "nodemon dist/server.js",
