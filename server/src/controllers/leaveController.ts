@@ -63,7 +63,7 @@ export const updateLeaveStatus = async (
         status: "Running",
       });
 
-      const batchIds = batches.map((b) => b._id.toString());
+      const batchIds = batches.map((b) => b._id);
       if (batchIds.length > 0) {
         const message = `Trainer ${
           (leave.trainer as any).name
@@ -91,7 +91,7 @@ export const updateLeaveStatus = async (
         // Emit Socket Event to Batch Rooms
         const io = getIO();
         batchIds.forEach((batchId) => {
-          io.to(`batch_${batchId}`).emit(
+          io.to(`batch_${batchId.toString()}`).emit(
             "receive_notification",
             newNotification,
           );
