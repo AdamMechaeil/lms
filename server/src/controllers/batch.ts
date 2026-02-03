@@ -301,7 +301,7 @@ export async function getBatchRecordings(req: Request, res: Response) {
 
 export const getBatchesByStudent = async (req: Request, res: Response) => {
   try {
-    const { studentId } = req.params;
+    const studentId = req.params.studentId as string;
     if (!studentId) {
       return res.status(400).json({ message: "Student ID is required" });
     }
