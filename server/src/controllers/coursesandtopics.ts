@@ -90,7 +90,7 @@ export const getCourseById = async (req: Request, res: Response) => {
     const course = await Course.aggregate([
       {
         $match: {
-          _id: new mongoose.Types.ObjectId(req.params.id),
+          _id: new mongoose.Types.ObjectId(req.params.id as string),
         },
       },
       {
@@ -255,7 +255,7 @@ export const assignCourseToStudent = async (req: Request, res: Response) => {
 
 export const getCourseTopics = async (req: Request, res: Response) => {
   try {
-    const courseId = req.params.id;
+    const courseId = req.params.id as string;
 
     if (!courseId) {
       res.status(400).json({ error: "Course ID is required" });
@@ -306,7 +306,7 @@ export const getCourseTopics = async (req: Request, res: Response) => {
 
 export const getCoursesByStudent = async (req: Request, res: Response) => {
   try {
-    const studentId = req.params.id;
+    const studentId = req.params.id as string;
 
     if (!studentId) {
       res.status(400).json({ error: "Student ID is required" });
