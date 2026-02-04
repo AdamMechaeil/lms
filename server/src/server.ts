@@ -11,7 +11,11 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: [process.env.CLIENT_URL || "http://localhost:3000"], // Specific origin required for credentials
+    origin: [
+      process.env.CLIENT_URL as string,
+      "https://lms-client-jry7.onrender.com",
+      "http://localhost:3000",
+    ], // Specific origin required for credentials
     methods: ["GET", "POST"],
     credentials: true,
   },
