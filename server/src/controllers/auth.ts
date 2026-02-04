@@ -43,8 +43,8 @@ export async function adminGoogleLogin(req: Request, res: Response) {
 
       res.cookie("accessToken", jwtToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        secure: true,
+        sameSite: "none",
         maxAge: 9 * 60 * 60 * 1000,
       });
 
@@ -100,8 +100,8 @@ export async function trainerGoogleLogin(req: Request, res: Response) {
 
       res.cookie("accessToken", jwtToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        secure: true,
+        sameSite: "none",
         maxAge: 9 * 60 * 60 * 1000,
       });
 
@@ -184,9 +184,9 @@ export async function studentLogin(req: Request, res: Response) {
 
       res.cookie("accessToken", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // true in production
-        sameSite: "lax", // or 'none' if cross-site
-        maxAge: 9 * 60 * 60 * 1000, // 9 hours
+        secure: true,
+        sameSite: "none",
+        maxAge: 9 * 60 * 60 * 1000,
       });
 
       return res.status(200).json({
