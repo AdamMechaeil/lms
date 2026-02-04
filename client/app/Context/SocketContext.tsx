@@ -20,7 +20,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     // 1. Connect if user exists (ALL roles: Student, Trainer, Admin)
     if (user) {
       const socketInstance = io(
-        process.env.NEXT_PUBLIC_DEV_BASE_URL || "http://localhost:8000",
+        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8000",
         {
           withCredentials: true, // Important for cookies/session
         },
