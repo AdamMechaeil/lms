@@ -49,6 +49,7 @@ app.use(
       "http://localhost:3000",
       "http://192.168.1.21:3000",
       "http://localhost:3001",
+      "https://lms-client-jry7.onrender.com",
     ], // Adjust as needed
     credentials: true,
   }),
