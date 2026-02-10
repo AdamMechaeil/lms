@@ -4,11 +4,18 @@ import StudentBatchLinkModel from "../models/studentbatchlink.js";
 import TrainerModel from "../models/trainer.js";
 import { google } from "googleapis";
 import { v4 as uuidv4 } from "uuid";
+import { logActivity } from "../utils/activityLogger.js";
 
 export const createBatch = async (req: Request, res: Response) => {
   try {
     const batch = await BatchModel.create({
       ...req.body,
+    });
+    await logActivity({
+      action: "BATCH_CREATED",
+      description: `New Batch '${batch.title}' created`,
+      target: batch._id,
+      metadata: { branch: batch.branch, trainer: batch.trainer },
     });
     res.status(201).json(batch);
   } catch (error) {
@@ -130,6 +137,15 @@ export const assignBatchToStudent = async (req: Request, res: Response) => {
     await StudentBatchLinkModel.create({
       batch: batchId,
       student: student._id,
+    });
+
+    // Fetch batch title for better logging
+    const batch = await BatchModel.findById(batchId).select("title");
+    await logActivity({
+      action: "STUDENT_ASSIGNED",
+      description: `Student '${student.name}' assigned to batch '${batch?.title || "Unknown"}'`,
+      target: student._id,
+      metadata: { batchId: batchId },
     });
 
     res.status(201).send("Batch assigned to student successfully");

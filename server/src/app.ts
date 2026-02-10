@@ -21,6 +21,7 @@ import attendanceRouter from "./routes/attendance.js";
 import chatRouter from "./routes/chatRoutes.js";
 import notificationRouter from "./routes/notification.js";
 import leaveRouter from "./routes/leave.js";
+import adminRouter from "./routes/admin.js";
 
 // const __filename = fileURLToPath(import.meta.url); // Removed
 // const __dirname = path.dirname(__filename); // Removed
@@ -83,3 +84,4 @@ app.use("/api/v1/attendance", attendanceRouter);
 app.use("/api/v1/chat", chatRouter);
 app.use("/api/v1/notification", notificationRouter);
 app.use("/api/v1/leave", leaveRouter);
+app.use("/api/v1/admin", adminRouter);
