@@ -10,6 +10,15 @@ import {
 import { BentoGrid, BentoGridItem } from "../../ui/bento-grid";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
 import { getAllBranches } from "@/app/Services/Branch";
 import { getAllStudents } from "@/app/Services/Student";
 import { getAllTrainers } from "@/app/Services/Trainer";
@@ -23,12 +32,19 @@ import {
 import { Skeleton } from "../../ui/skeleton";
 import { cn } from "@/lib/utils";
 import { GlassCard } from "@/app/Components/ui/glass-card";
+import { toast } from "sonner";
+import { getDashboardStats, getRecentActivity } from "@/app/Services/Dashboard";
+import { useSocket } from "@/app/Context/SocketContext";
+import { formatDistanceToNow } from "date-fns";
 
 interface Branch {
   _id: string;
   name: string;
   // add other fields if necessary
 }
+
+// Helper to generate smooth SVG path (Catmull-Rom like) - REMOVED
+// Chart Component - REMOVED
 
 export function Main() {
   const [branches, setBranches] = useState<Branch[]>([]);
@@ -39,7 +55,13 @@ export function Main() {
     totalTrainers: 0,
   });
 
+  // Analytics State
+  const [growthData, setGrowthData] = useState<number[]>([]);
+  const [growthLabels, setGrowthLabels] = useState<string[]>([]);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+
   const [loading, setLoading] = useState(true);
+  const { socket } = useSocket();
 
   // Fetch initial data (Branches)
   useEffect(() => {
@@ -55,6 +77,7 @@ export function Main() {
         }
       } catch (error) {
         console.error("Failed to fetch branches", error);
+        toast.error("Failed to fetch branches");
       }
     };
     fetchBranches();
@@ -80,6 +103,7 @@ export function Main() {
         }));
       } catch (error) {
         console.error("Failed to fetch dashboard data", error);
+        toast.error("Failed to fetch dashboard data");
       } finally {
         setLoading(false);
       }
@@ -87,6 +111,74 @@ export function Main() {
 
     fetchData();
   }, [selectedBranch]);
+
+  // Fetch Analytics (Global)
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const statsRes = await getDashboardStats();
+        if (statsRes && statsRes.growth) {
+          setGrowthData(statsRes.growth.data);
+          setGrowthLabels(statsRes.growth.labels);
+        }
+
+        const activityRes = await getRecentActivity();
+        if (Array.isArray(activityRes)) {
+          setRecentActivity(activityRes);
+        }
+      } catch (error) {
+        console.error("Failed to fetch analytics:", error);
+      }
+    };
+    fetchAnalytics();
+  }, []);
+
+  // Listen for Real-time Updates
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewActivity = (data: any) => {
+      // 1. Add to Activity Feed
+      setRecentActivity((prev) => [data, ...prev].slice(0, 10));
+
+      // 2. Update Stats (Global) & Charts
+      if (data.action === "STUDENT_REGISTERED") {
+        setStats((prev) => ({
+          ...prev,
+          totalStudents: prev.totalStudents + 1,
+        }));
+        // Update Chart: Increment last month's count
+        setGrowthData((prev) => {
+          const newData = [...prev];
+          if (newData.length > 0) {
+            newData[newData.length - 1] += 1;
+          }
+          return newData;
+        });
+      } else if (data.action === "TRAINER_JOINED") {
+        setStats((prev) => ({
+          ...prev,
+          totalTrainers: prev.totalTrainers + 1,
+        }));
+      } else if (data.action === "BATCH_CREATED") {
+        // Only update if no branch filter is active, or if we knew which branch it belongs to.
+        // For now, global update is fine or we can skip strictly if filter is on.
+        // Since stats fetch is dependent on filter, we might desync if we just increment globally while viewing a specific branch.
+        // But for "All Branches", it's correct.
+        if (selectedBranch === "all") {
+          // logic to update totalBatches (but stats.totalBranches comes from getAllBranches length usually?)
+          // actually stats.totalBranches is set from branches array length.
+          // We can leave branches update to a re-fetch or manual add if needed.
+        }
+      }
+    };
+
+    socket.on("dashboard:new_activity", handleNewActivity);
+
+    return () => {
+      socket.off("dashboard:new_activity", handleNewActivity);
+    };
+  }, [socket, selectedBranch]);
 
   const statsItems = [
     {
@@ -112,19 +204,13 @@ export function Main() {
     },
   ];
 
-  const recentActivity = [
-    { text: "New Batch 'React-24' created", time: "2 mins ago", type: "batch" },
-    { text: "Trainer 'John Doe' joined", time: "1 hour ago", type: "user" },
-    { text: "System Audit complete", time: "3 hours ago", type: "system" },
-    {
-      text: "New Student 'Alice' registered",
-      time: "5 hours ago",
-      type: "student",
-    },
-  ];
-
-  const growthData = [40, 65, 80, 50, 90, 120];
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+  // Helper to map activity type to UI style
+  const getActivityType = (action: string) => {
+    if (action.includes("STUDENT")) return "student";
+    if (action.includes("TRAINER")) return "user";
+    if (action.includes("BATCH")) return "batch";
+    return "system";
+  };
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
@@ -167,7 +253,7 @@ export function Main() {
                 key={i}
                 className={cn(
                   "row-span-1 rounded-xl group/bento hover:shadow-xl transition duration-200 shadow-input dark:shadow-none p-4 dark:bg-black dark:border-white/[0.2] bg-white border border-transparent justify-between flex flex-col space-y-4",
-                  i === 3 || i === 6 ? "md:col-span-2" : ""
+                  i === 3 || i === 6 ? "md:col-span-2" : "",
                 )}
               >
                 <Skeleton className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl" />
@@ -231,35 +317,86 @@ export function Main() {
           </>
         ) : (
           <>
-            {/* Student Growth Chart */}
-            <GlassCard>
+            {/* Student Growth Chart - Custom SVG Line Graph */}
+            <GlassCard className="relative overflow-hidden">
               <div className="flex items-center gap-2 mb-6">
                 <TrendingUp className="w-5 h-5 text-neutral-500" />
                 <h3 className="text-lg font-bold text-neutral-800 dark:text-neutral-200">
                   Student Growth
                 </h3>
               </div>
-              <div className="h-64 flex items-end justify-between gap-2">
-                {growthData.map((value, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-col items-center gap-2 w-full group"
-                  >
-                    <motion.div
-                      initial={{ height: 0 }}
-                      animate={{ height: `${(value / 120) * 100}%` }}
-                      transition={{ duration: 1, delay: index * 0.1 }}
-                      className="w-full bg-blue-500/80 rounded-t-sm group-hover:bg-blue-600 transition-colors relative"
+
+              <div className="h-64 w-full relative">
+                {growthData.length > 0 && (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={growthData.map((val, i) => ({
+                        name: growthLabels[i],
+                        students: val,
+                      }))}
+                      margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                     >
-                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                        {value} students
-                      </div>
-                    </motion.div>
-                    <span className="text-xs text-neutral-500">
-                      {months[index]}
-                    </span>
-                  </div>
-                ))}
+                      <defs>
+                        <linearGradient
+                          id="colorStudents"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="#3b82f6"
+                            stopOpacity={0.8}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="#3b82f6"
+                            stopOpacity={0}
+                          />
+                        </linearGradient>
+                      </defs>
+                      <XAxis
+                        dataKey="name"
+                        stroke="#888888"
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis
+                        stroke="#888888"
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                        tickFormatter={(value) => `${value}`}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "rgba(0,0,0,0.8)",
+                          borderRadius: "8px",
+                          border: "none",
+                          boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                        }}
+                        itemStyle={{ color: "#fff" }}
+                        labelStyle={{ color: "#9ca3af" }}
+                      />
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        vertical={false}
+                        stroke="#333"
+                        opacity={0.1}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="students"
+                        stroke="#3b82f6"
+                        fillOpacity={1}
+                        fill="url(#colorStudents)"
+                        strokeWidth={2}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                )}
               </div>
             </GlassCard>
 
@@ -277,10 +414,14 @@ export function Main() {
                     <div className="w-2 h-2 mt-2 rounded-full bg-emerald-500 shrink-0" />
                     <div>
                       <p className="text-sm font-medium text-neutral-800 dark:text-neutral-200">
-                        {activity.text}
+                        {activity.description}
                       </p>
                       <p className="text-xs text-neutral-500">
-                        {activity.time}
+                        {activity.createdAt
+                          ? formatDistanceToNow(new Date(activity.createdAt), {
+                              addSuffix: true,
+                            })
+                          : "Just now"}
                       </p>
                     </div>
                   </div>

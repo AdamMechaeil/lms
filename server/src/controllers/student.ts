@@ -6,6 +6,7 @@ import { sendWelcomeEmail } from "../utils/Email.js";
 import StudentModel from "../models/student.js";
 import CounterModel from "../models/counter.js";
 import { deleteFromS3 } from "../utils/s3.js";
+import { logActivity } from "../utils/activityLogger.js";
 export const createStudent = async (req: Request, res: Response) => {
   try {
     const { name, email } = req.body;
@@ -32,6 +33,13 @@ export const createStudent = async (req: Request, res: Response) => {
       password: hashedPassword,
       firstLogin: true,
       profilePicture,
+    });
+
+    await logActivity({
+      action: "STUDENT_REGISTERED",
+      description: `New student ${name} joined`,
+      target: student._id,
+      metadata: { studentId: student.studentId },
     });
 
     sendWelcomeEmail(email, name, plainPassword);

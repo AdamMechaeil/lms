@@ -14,53 +14,56 @@ export interface Batch extends mongoose.Document {
   googleMeetLink: string;
 }
 
-const batchSchema = new mongoose.Schema<Batch>({
-  title: {
-    type: String,
-    required: true,
+const batchSchema = new mongoose.Schema<Batch>(
+  {
+    title: {
+      type: String,
+      required: true,
+    },
+    branch: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+      required: true,
+    },
+    trainer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Trainer",
+      required: true,
+    },
+    startDate: {
+      type: Date,
+      required: true,
+    },
+    endDate: {
+      type: Date,
+    },
+    startTime: {
+      type: String,
+      required: true,
+    },
+    endTime: {
+      type: String,
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ["Running", "Completed"],
+      default: "Running",
+    },
+    currentTopic: {
+      type: String,
+    },
+    type: {
+      type: String,
+      enum: ["Weekdays", "Weekends"],
+      required: true,
+    },
+    googleMeetLink: {
+      type: String,
+    },
   },
-  branch: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Branch",
-    required: true,
-  },
-  trainer: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Trainer",
-    required: true,
-  },
-  startDate: {
-    type: Date,
-    required: true,
-  },
-  endDate: {
-    type: Date,
-  },
-  startTime: {
-    type: String,
-    required: true,
-  },
-  endTime: {
-    type: String,
-    required: true,
-  },
-  status: {
-    type: String,
-    enum: ["Running", "Completed"],
-    default: "Running",
-  },
-  currentTopic: {
-    type: String,
-  },
-  type: {
-    type: String,
-    enum: ["Weekdays", "Weekends"],
-    required: true,
-  },
-  googleMeetLink: {
-    type: String,
-  },
-});
+  { timestamps: true },
+);
 
 const BatchModel = mongoose.model("Batch", batchSchema);
 

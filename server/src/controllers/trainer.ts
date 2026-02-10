@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import TrainerModel from "../models/trainer.js";
 import EmailModel from "../models/email.js";
 import { deleteFromS3 } from "../utils/s3.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 export async function createTrainer(req: Request, res: Response) {
   try {
@@ -25,6 +26,13 @@ export async function createTrainer(req: Request, res: Response) {
       designation,
       gender,
       profilePicture,
+    });
+
+    await logActivity({
+      action: "TRAINER_JOINED",
+      description: `New Trainer ${name} joined`,
+      target: trainer._id,
+      metadata: { branch, domain },
     });
 
     res.status(201).json(trainer);
