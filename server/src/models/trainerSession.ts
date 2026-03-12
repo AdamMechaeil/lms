@@ -10,6 +10,7 @@ export interface ITrainerSession extends mongoose.Document {
   ipAddress?: string;
   device?: string;
   duration?: number; // In milliseconds
+  institute: mongoose.Types.ObjectId;
 }
 
 const trainerSessionSchema = new mongoose.Schema<ITrainerSession>(
@@ -48,8 +49,13 @@ const trainerSessionSchema = new mongoose.Schema<ITrainerSession>(
     duration: {
       type: Number, // Stored in milliseconds
     },
+    institute: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Institute",
+      required: true,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Indexes
@@ -58,7 +64,7 @@ trainerSessionSchema.index({ status: 1 }); // Find Active sessions to auto-close
 
 const TrainerSessionModel = mongoose.model<ITrainerSession>(
   "TrainerSession",
-  trainerSessionSchema
+  trainerSessionSchema,
 );
 
 export default TrainerSessionModel;

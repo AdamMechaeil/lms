@@ -12,6 +12,7 @@ export interface Student extends mongoose.Document {
   email: string;
   status: "Active" | "Completed";
   gender: string;
+  institute: mongoose.Types.ObjectId;
 }
 
 const studentSchema = new mongoose.Schema<Student>(
@@ -66,6 +67,11 @@ const studentSchema = new mongoose.Schema<Student>(
       enum: ["Active", "Completed"],
       required: true,
       default: "Active",
+    },
+    institute: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Institute",
+      required: true,
     },
   },
   { timestamps: true },

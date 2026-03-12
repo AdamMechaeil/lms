@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 export interface Topic extends mongoose.Document {
   name: string;
   duration: number;
+  institute: mongoose.Types.ObjectId;
 }
 
 const topicSchema = new mongoose.Schema<Topic>({
@@ -12,6 +13,11 @@ const topicSchema = new mongoose.Schema<Topic>({
   },
   duration: {
     type: Number,
+    required: true,
+  },
+  institute: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Institute",
     required: true,
   },
 });

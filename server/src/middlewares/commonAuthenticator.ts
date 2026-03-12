@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 interface JWTPayload extends jwt.JwtPayload {
   email: string;
   role: "Admin" | "Trainer" | "student";
+  instituteId?: string;
 }
 
 export const commonAuthenticator = (

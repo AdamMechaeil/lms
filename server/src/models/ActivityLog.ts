@@ -8,6 +8,7 @@ export interface IActivityLog extends Document {
   target?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
+  institute: mongoose.Types.ObjectId;
 }
 
 const ActivityLogSchema: Schema = new Schema(
@@ -17,6 +18,11 @@ const ActivityLogSchema: Schema = new Schema(
     metadata: { type: Schema.Types.Mixed },
     actor: { type: Schema.Types.ObjectId, ref: "Admin" },
     target: { type: Schema.Types.ObjectId },
+    institute: {
+      type: Schema.Types.ObjectId,
+      ref: "Institute",
+      required: true,
+    },
   },
   { timestamps: true },
 );

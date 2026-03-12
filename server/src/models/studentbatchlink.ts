@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 export interface StudentBatchLink extends mongoose.Document {
   student: mongoose.Types.ObjectId;
   batch: mongoose.Types.ObjectId;
+  institute: mongoose.Types.ObjectId;
 }
 
 const studentBatchLinkSchema = new mongoose.Schema<StudentBatchLink>({
@@ -16,11 +17,16 @@ const studentBatchLinkSchema = new mongoose.Schema<StudentBatchLink>({
     ref: "Batch",
     required: true,
   },
+  institute: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Institute",
+    required: true,
+  },
 });
 
 const StudentBatchLinkModel = mongoose.model(
   "StudentBatchLink",
-  studentBatchLinkSchema
+  studentBatchLinkSchema,
 );
 
 export default StudentBatchLinkModel;

@@ -4,12 +4,13 @@ import jwt from "jsonwebtoken";
 interface JWTPayload extends jwt.JwtPayload {
   email: string;
   role: "Admin" | "Trainer";
+  instituteId?: string;
 }
 
 export const admintrainerAuthenticator = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const token = req.cookies.accessToken;
   if (!token) {
@@ -18,7 +19,7 @@ export const admintrainerAuthenticator = (
   try {
     const decode = jwt.verify(
       token,
-      process.env.JWT_SECRET as string
+      process.env.JWT_SECRET as string,
     ) as JWTPayload;
     if (!decode) {
       return res.status(401).json({ message: "Unauthorized" });

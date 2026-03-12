@@ -5,6 +5,7 @@ export interface Material extends mongoose.Document {
   description: string;
   file: string;
   type: "Video" | "Document" | "Image";
+  institute: mongoose.Types.ObjectId;
 }
 
 const materialSchema = new mongoose.Schema<Material>({
@@ -23,6 +24,11 @@ const materialSchema = new mongoose.Schema<Material>({
   type: {
     type: String,
     enum: ["Video", "Document", "Image"],
+    required: true,
+  },
+  institute: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Institute",
     required: true,
   },
 });

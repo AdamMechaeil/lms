@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 export interface CourseTopicLink extends mongoose.Document {
   course: mongoose.Types.ObjectId;
   topic: mongoose.Types.ObjectId;
+  institute: mongoose.Types.ObjectId;
 }
 
 const courseTopicLinkSchema = new mongoose.Schema<CourseTopicLink>({
@@ -16,11 +17,16 @@ const courseTopicLinkSchema = new mongoose.Schema<CourseTopicLink>({
     ref: "Topic",
     required: true,
   },
+  institute: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Institute",
+    required: true,
+  },
 });
 
 const CourseTopicLinkModel = mongoose.model<CourseTopicLink>(
   "CourseTopicLink",
-  courseTopicLinkSchema
+  courseTopicLinkSchema,
 );
 
 export default CourseTopicLinkModel;

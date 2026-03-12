@@ -1,6 +1,7 @@
 import express from "express";
 import {
   adminGoogleLogin,
+  adminGoogleRegister,
   trainerGoogleLogin,
   connectGoogle,
   studentLogin,
@@ -10,6 +11,8 @@ import {
 } from "../controllers/auth.js";
 
 const authRouter = express.Router();
+
+authRouter.post("/admin/register", adminGoogleRegister);
 
 authRouter.post("/admin/signin", adminGoogleLogin);
 

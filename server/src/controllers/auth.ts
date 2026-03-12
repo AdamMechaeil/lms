@@ -7,6 +7,124 @@ import bcrypt from "bcrypt";
 import { google } from "googleapis";
 import TrainerModel from "../models/trainer.js";
 import AdminModel from "../models/admin.js";
+import InstituteModel from "../models/institute.js";
+import SubscriptionModel from "../models/subscription.js";
+import PlanModel from "../models/plan.js";
+
+export async function adminGoogleRegister(req: Request, res: Response) {
+  try {
+    const { token, instituteName, subdomain } = req.body;
+    if (!instituteName || !subdomain) {
+      return res.status(400).json({ message: "Institute name and subdomain are required." });
+    }
+
+    const client = new google.auth.OAuth2(process.env.GOOGLE_CLIENT_ID);
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email) {
+      return res.status(401).json({ message: "Invalid Google Token" });
+    }
+
+    const { email, name } = payload;
+    
+    // Check if email already exists
+    const isEmailExist = await EmailModel.findOne({ email });
+    if (isEmailExist) {
+       return res.status(400).json({ message: "User already registered! Please login." });
+    }
+
+    // Check if subdomain is taken
+    const isDomainExist = await InstituteModel.findOne({ subdomain });
+    if (isDomainExist) {
+       return res.status(400).json({ message: "Subdomain already taken. Choose another." });
+    }
+
+    // Create Free Plan if not exists
+    let freePlan = await PlanModel.findOne({ name: "Free Trial" });
+    if (!freePlan) {
+      freePlan = await PlanModel.create({
+        name: "Free Trial",
+        description: "Default free trial plan",
+        price: 0,
+        currency: "INR",
+        billingCycle: "monthly",
+        features: {
+          maxStudents: 50,
+          maxStorageGB: 5,
+          customDomain: false,
+        }
+      });
+    }
+
+    // Create Institute
+    const institute = await InstituteModel.create({
+      name: instituteName,
+      subdomain,
+      adminName: name || "Admin",
+      adminEmail: email,
+      isActive: true,
+    });
+
+    // Create Subscription
+    const subscription = await SubscriptionModel.create({
+      institute: institute._id,
+      plan: freePlan._id,
+      status: "active",
+      startDate: new Date(),
+      endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // 1 year free trial
+      limitsSnapshot: freePlan.features,
+    });
+
+    // Update Institute with subscription
+    institute.currentSubscription = subscription._id as any;
+    await institute.save();
+
+    // Create Email (Role: Admin)
+    const newEmail = await EmailModel.create({
+      email,
+      role: "Admin",
+      institute: institute._id,
+    });
+
+    // Create Admin Profile
+    const admin = await AdminModel.create({
+      name: name || "Admin",
+      email: newEmail._id,
+      institute: institute._id,
+    });
+
+    // Generate JWT
+    const jwtToken = jwt.sign(
+      { email, role: "Admin", userId: admin._id, instituteId: institute._id },
+      process.env.JWT_SECRET as string,
+      { expiresIn: "9h" }
+    );
+
+    res.cookie("accessToken", jwtToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 9 * 60 * 60 * 1000,
+    });
+
+    return res.status(201).json({
+      message: "Registration successful",
+      role: "Admin",
+      userId: admin._id,
+      instituteId: institute._id,
+      email: email,
+      verified: true,
+    });
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
 
 export async function adminGoogleLogin(req: Request, res: Response) {
   try {
@@ -34,7 +152,12 @@ export async function adminGoogleLogin(req: Request, res: Response) {
       }
       const admin = await AdminModel.findOne({ email: isEmailExist._id });
       const jwtToken = jwt.sign(
-        { email, role: isEmailExist.role, userId: admin?._id },
+        { 
+          email, 
+          role: isEmailExist.role, 
+          userId: admin?._id,
+          instituteId: isEmailExist.institute 
+        },
         process.env.JWT_SECRET as string,
         {
           expiresIn: "9h",
@@ -91,7 +214,12 @@ export async function trainerGoogleLogin(req: Request, res: Response) {
       }
       const trainer = await TrainerModel.findOne({ email: isEmailExist._id });
       const jwtToken = jwt.sign(
-        { email, role: isEmailExist.role, userId: trainer?._id },
+        { 
+          email, 
+          role: isEmailExist.role, 
+          userId: trainer?._id,
+          instituteId: isEmailExist.institute
+        },
         process.env.JWT_SECRET as string,
         {
           expiresIn: "9h",
@@ -175,7 +303,12 @@ export async function studentLogin(req: Request, res: Response) {
         return res.status(401).json({ message: "Unauthorized" });
       }
       const token = jwt.sign(
-        { email: student.email, role: "student", userId: student._id },
+        { 
+          email: student.email, 
+          role: "student", 
+          userId: student._id,
+          instituteId: student.institute 
+        },
         process.env.JWT_SECRET as string,
         {
           expiresIn: "9h",
@@ -219,7 +352,12 @@ export async function updateStudentPassword(req: Request, res: Response) {
     student.firstLogin = false;
     await student.save();
     const token = jwt.sign(
-      { email: student.email, role: "student", userId: student._id },
+      { 
+        email: student.email, 
+        role: "student", 
+        userId: student._id,
+        instituteId: student.institute
+      },
       process.env.JWT_SECRET as string,
       {
         expiresIn: "9h",
@@ -252,6 +390,7 @@ export async function verifyToken(req: Request, res: Response) {
       verified: true,
       userId: decodedToken.userId,
       email: decodedToken.email,
+      instituteId: decodedToken.instituteId,
     });
   } catch (error) {
     console.log(error);
