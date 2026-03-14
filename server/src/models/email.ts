@@ -2,14 +2,14 @@ import mongoose from "mongoose";
 
 export interface Email extends mongoose.Document {
   email: string;
-  role: "Trainer" | "Admin";
+  role: "Trainer" | "Admin" | "Employee";
   institute: mongoose.Types.ObjectId;
 }
 
 const emailSchema = new mongoose.Schema<Email>(
   {
     email: { type: String, required: true },
-    role: { type: String, enum: ["Trainer", "Admin"], required: true },
+    role: { type: String, enum: ["Trainer", "Admin", "Employee"], required: true },
     institute: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Institute",

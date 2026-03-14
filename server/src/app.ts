@@ -4,8 +4,6 @@ import helmet from "helmet";
 import morgan from "morgan";
 import compression from "compression";
 import path from "path";
-// import { fileURLToPath } from "url"; // Removed
-
 import { connectDB } from "./config/db.js";
 import branchRouter from "./routes/branch.js";
 import trainerRouter from "./routes/trainer.js";
@@ -22,6 +20,10 @@ import chatRouter from "./routes/chatRoutes.js";
 import notificationRouter from "./routes/notification.js";
 import leaveRouter from "./routes/leave.js";
 import adminRouter from "./routes/admin.js";
+import subscriptionRouter from "./routes/subscription.js";
+import leadRouter from "./routes/lead.js";
+import feeRouter from "./routes/fee.js";
+import saasRouter from "./routes/saas.js";
 
 // const __filename = fileURLToPath(import.meta.url); // Removed
 // const __dirname = path.dirname(__filename); // Removed
@@ -89,3 +91,7 @@ app.use("/api/v1/chat", chatRouter);
 app.use("/api/v1/notification", notificationRouter);
 app.use("/api/v1/leave", leaveRouter);
 app.use("/api/v1/admin", adminRouter);
+app.use("/api/v1/subscription", subscriptionRouter);
+app.use("/api/v1/lead", leadRouter);
+app.use("/api/v1/fee", feeRouter);
+app.use("/api/v1/saas", saasRouter);

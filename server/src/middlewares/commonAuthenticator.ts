@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 
 interface JWTPayload extends jwt.JwtPayload {
   email: string;
-  role: "Admin" | "Trainer" | "student";
+  role: "Admin" | "Trainer" | "student" | "Employee";
   instituteId?: string;
 }
 
@@ -27,7 +27,8 @@ export const commonAuthenticator = (
     if (
       decode.role !== "Admin" &&
       decode.role !== "Trainer" &&
-      decode.role !== "student"
+      decode.role !== "student" &&
+      decode.role !== "Employee"
     ) {
       return res.status(401).json({ message: "Unauthorized" });
     }

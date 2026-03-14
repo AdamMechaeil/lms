@@ -10,7 +10,7 @@ import {
 import { adminAuthenticator } from "../middlewares/adminAuthenticator.js";
 import { admintrainerAuthenticator } from "../middlewares/admintrainerAuthenticator.js";
 import { commonAuthenticator } from "../middlewares/commonAuthenticator.js";
-
+import { requireStudentLimit } from "../middlewares/requireStudentLimit.js";
 import { upload } from "../middlewares/multer.js";
 
 const studentRouter = express.Router();
@@ -18,6 +18,7 @@ const studentRouter = express.Router();
 studentRouter.post(
   "/createStudent",
   adminAuthenticator,
+  requireStudentLimit,
   upload.single("profilePicture"),
   createStudent,
 );
