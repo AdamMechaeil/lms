@@ -95,9 +95,6 @@ export const getDashboardStats = async (req: Request, res: Response) => {
   }
 };
 
-// Fix imports if necessary
-import ActivityLogModel from "../models/ActivityLog.js";
-
 export const getRecentActivity = async (req: Request, res: Response) => {
   try {
     const logs = await ActivityLogModel.find()
