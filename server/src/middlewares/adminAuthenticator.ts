@@ -13,9 +13,14 @@ export async function adminAuthenticator(
   next: NextFunction,
 ) {
   try {
-    const token = req.cookies.accessToken;
+    // Support both HTTP-only Cookies (Prod) and Bearer tokens (Testing)
+    const token =
+      req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
+    console.log(token);
     if (!token) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: No token provided" });
     }
 
     const decode = jwt.verify(
@@ -25,10 +30,13 @@ export async function adminAuthenticator(
     if (!decode) {
       return res.status(401).json({ message: "Unauthorized" });
     }
+    console.log(decode);
 
     if (decode.role != "Admin") {
       return res.status(401).json({ message: "Unauthorized" });
     }
+    //@ts-ignore
+    req.instituteId = decode.instituteId;
     next();
   } catch (error) {
     return res.status(401).json({ message: "Unauthorized" });

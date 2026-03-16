@@ -12,9 +12,11 @@ export const admintrainerAuthenticator = (
   res: Response,
   next: NextFunction,
 ) => {
-  const token = req.cookies.accessToken;
+  // Support both HTTP-only Cookies (Prod) and Bearer tokens (Testing)
+  const token = req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
+  
   if (!token) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ message: "Unauthorized: No token provided" });
   }
   try {
     const decode = jwt.verify(

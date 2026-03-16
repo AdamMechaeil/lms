@@ -24,6 +24,7 @@ import subscriptionRouter from "./routes/subscription.js";
 import leadRouter from "./routes/lead.js";
 import feeRouter from "./routes/fee.js";
 import saasRouter from "./routes/saas.js";
+import roleRouter from "./routes/role.js";
 
 // const __filename = fileURLToPath(import.meta.url); // Removed
 // const __dirname = path.dirname(__filename); // Removed
@@ -95,3 +96,4 @@ app.use("/api/v1/subscription", subscriptionRouter);
 app.use("/api/v1/lead", leadRouter);
 app.use("/api/v1/fee", feeRouter);
 app.use("/api/v1/saas", saasRouter);
+app.use("/api/v1/role", roleRouter);

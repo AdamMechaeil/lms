@@ -72,11 +72,11 @@ export async function adminGoogleRegister(req: Request, res: Response) {
     // Create Subscription
     const subscription = await SubscriptionModel.create({
       institute: institute._id,
-      plan: freePlan._id,
+      planId: freePlan._id, // Renamed from plan to planId based on Phase 3 schema
       status: "active",
       startDate: new Date(),
       endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // 1 year free trial
-      limitsSnapshot: freePlan.features,
+      limits: freePlan.features, // Renamed from limitsSnapshot to limits based on Phase 3 schema
     });
 
     // Update Institute with subscription
@@ -118,6 +118,7 @@ export async function adminGoogleRegister(req: Request, res: Response) {
       instituteId: institute._id,
       email: email,
       verified: true,
+      token: jwtToken,
     });
 
   } catch (error) {
@@ -177,6 +178,7 @@ export async function adminGoogleLogin(req: Request, res: Response) {
         userId: admin?._id,
         email: email,
         verified: true,
+        token: jwtToken,
       });
     } else {
       return res.status(401).json({ message: "Unauthorized" });
@@ -241,6 +243,7 @@ export async function trainerGoogleLogin(req: Request, res: Response) {
         email: email,
         role: isEmailExist.role,
         verified: true,
+        token: jwtToken,
       });
     } else {
       return res.status(401).json({ message: "Unauthorized" });
