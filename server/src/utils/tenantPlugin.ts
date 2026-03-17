@@ -1,17 +1,11 @@
 import mongoose from "mongoose";
 import { TenantContext } from "./tenantContext.js";
 
-/**
- * Global Mongoose Plugin for Multi-Tenancy
- * Automatically injects/filters by instituteId using AsyncLocalStorage.
- */
 export const tenantPlugin = (schema: mongoose.Schema) => {
-  // 1. Inject instituteId on Create / Save
   schema.pre("save", function (next) {
     const instituteId = TenantContext.getInstituteId();
 
     if (instituteId) {
-      // If saving a new document and institute is not already set
       if (this.isNew && !this.institute) {
         this.institute = new mongoose.Types.ObjectId(instituteId);
       }
@@ -19,7 +13,6 @@ export const tenantPlugin = (schema: mongoose.Schema) => {
     next();
   });
 
-  // 1.b Inject instituteId on insertMany
   schema.pre("insertMany", function (next, docs) {
     const instituteId = TenantContext.getInstituteId();
     if (instituteId) {
@@ -34,7 +27,6 @@ export const tenantPlugin = (schema: mongoose.Schema) => {
     next();
   });
 
-  // 2. Filter by instituteId on Queries (Find, Update, Delete)
   const applyTenantFilter = function (
     this: mongoose.Query<any, any>,
     next: mongoose.CallbackWithoutResultAndOptionalError,
@@ -42,7 +34,6 @@ export const tenantPlugin = (schema: mongoose.Schema) => {
     const instituteId = TenantContext.getInstituteId();
 
     if (instituteId) {
-      // Append instituteId to the existing query filter
       this.where({ institute: new mongoose.Types.ObjectId(instituteId) });
     }
     next();
@@ -59,7 +50,4 @@ export const tenantPlugin = (schema: mongoose.Schema) => {
   schema.pre("updateMany", applyTenantFilter);
   schema.pre("countDocuments", applyTenantFilter);
   schema.pre("estimatedDocumentCount", applyTenantFilter);
-
-  // 3. Prevent populating 'institute' by default to save memory,
-  // unless explicitly requested, as the tenant context already knows the institute.
 };

@@ -1,14 +1,14 @@
 import TrainerSessionModel from "../models/trainerSession.js";
+import TrainerModel from "../models/trainer.js";
+import TrainerAttendanceModel from "../models/trainerAttendance.js";
 
-// Run every 15 minutes
 const CHECK_INTERVAL = 15 * 60 * 1000;
 
-// Safety Net: If a session is "Active" but hasn't had activity for > 1 hour, assume server crashed/socket failed.
 const CRASH_TIMEOUT = 60 * 60 * 1000;
 
 export const initScheduler = () => {
   console.log(
-    "Scheduler initialized: Monitoring Trainer Sessions (Safety Net)..."
+    "Scheduler initialized: Monitoring Trainer Sessions (Safety Net)...",
   );
 
   setInterval(async () => {
@@ -23,7 +23,7 @@ export const initScheduler = () => {
 
       for (const session of abandonedSessions) {
         console.log(
-          `Safety Net: Auto-closing crashed session for Trainer ${session.trainerId}`
+          `Safety Net: Auto-closing crashed session for Trainer ${session.trainerId}`,
         );
 
         session.endTime = session.lastActiveAt;
@@ -40,20 +40,13 @@ export const initScheduler = () => {
 
       if (abandonedSessions.length > 0) {
         console.log(
-          `Processed ${abandonedSessions.length} abandoned sessions.`
+          `Processed ${abandonedSessions.length} abandoned sessions.`,
         );
       }
     } catch (error) {
       console.error("Scheduler Error:", error);
     }
   }, CHECK_INTERVAL);
-
-  // Daily Attendance Calculation (Runs every 24 hours)
-  // In a real production app, use 'node-cron' for precise timing (e.g., "0 1 * * *").
-  // Since we are using setInterval, we'll just run this check periodically or set a separate long interval.
-  // For simplicity here, we'll assume this server runs 24/7 and we check once a day.
-  // Better approach here: Check periodically (e.g., every hour) if "yesterday's" attendance is calculated.
-  // But to keep it simple for this user request without adding dependencies:
 
   const DAILY_CHECK_INTERVAL = 60 * 60 * 1000; // Check every hour
 
@@ -65,9 +58,6 @@ export const initScheduler = () => {
     }
   }, DAILY_CHECK_INTERVAL);
 };
-
-import TrainerModel from "../models/trainer.js";
-import TrainerAttendanceModel from "../models/trainerAttendance.js";
 
 const calculateDailyAttendance = async () => {
   // Target: Yesterday (since today is not over)
@@ -100,7 +90,7 @@ const calculateDailyAttendance = async () => {
 
     const totalDurationMs = sessions.reduce(
       (acc, curr) => acc + (curr.duration || 0),
-      0
+      0,
     );
     const totalHours = totalDurationMs / (1000 * 60 * 60);
 
@@ -128,7 +118,7 @@ const calculateDailyAttendance = async () => {
     console.log(
       `Calculated Attendance for ${
         trainer.name
-      }: ${status} (${totalHours.toFixed(2)} hrs)`
+      }: ${status} (${totalHours.toFixed(2)} hrs)`,
     );
   }
 };
