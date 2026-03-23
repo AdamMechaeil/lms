@@ -1,12 +1,15 @@
 import AxiosInstance from "../Utils/AxiosInstance";
 import {
   ADMIN_LOGIN,
+  ADMIN_REGISTER,
   TRAINER_LOGIN,
   CONNECT_GOOGLE,
   STUDENT_LOGIN,
   UPDATE_STUDENT_PASSWORD,
   VERIFY_TOKEN,
   LOGOUT,
+  GET_PLANS,
+  ACTIVATE_SUBSCRIPTION,
 } from "../Utils/Constants/Auth";
 
 export async function Adminlogin(token: string) {
@@ -15,6 +18,33 @@ export async function Adminlogin(token: string) {
     return response.data;
   } catch (error: any) {
     throw error.response?.data?.message || "Login failed";
+  }
+}
+
+export async function AdminRegister(data: { token: string; instituteName: string; subdomain: string }) {
+  try {
+    const response = await AxiosInstance.post(ADMIN_REGISTER, data);
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data?.message || "Registration failed";
+  }
+}
+
+export async function GetPlans() {
+  try {
+    const response = await AxiosInstance.get(GET_PLANS);
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data?.message || "Failed to fetch plans";
+  }
+}
+
+export async function ActivateSubscription(planId: string) {
+  try {
+    const response = await AxiosInstance.post(ACTIVATE_SUBSCRIPTION, { planId });
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data?.message || "Subscription activation failed";
   }
 }
 

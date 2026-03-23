@@ -17,6 +17,7 @@ interface User {
   email: string;
   role: string;
   verified: boolean;
+  instituteId?: string;
 }
 
 interface AuthContextType {

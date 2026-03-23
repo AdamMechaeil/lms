@@ -31,33 +31,16 @@ export async function adminGoogleRegister(req: Request, res: Response) {
 
     const { email, name } = payload;
     
-    // Check if email already exists
-    const isEmailExist = await EmailModel.findOne({ email });
+    // Check if email already exists (Auth routes must bypass tenant filter to search globally)
+    const isEmailExist = await EmailModel.findOne({ email }).setOptions({ bypassTenantFilter: true });
     if (isEmailExist) {
        return res.status(400).json({ message: "User already registered! Please login." });
     }
 
     // Check if subdomain is taken
-    const isDomainExist = await InstituteModel.findOne({ subdomain });
+    const isDomainExist = await InstituteModel.findOne({ subdomain }).setOptions({ bypassTenantFilter: true });
     if (isDomainExist) {
        return res.status(400).json({ message: "Subdomain already taken. Choose another." });
-    }
-
-    // Create Free Plan if not exists
-    let freePlan = await PlanModel.findOne({ name: "Free Trial" });
-    if (!freePlan) {
-      freePlan = await PlanModel.create({
-        name: "Free Trial",
-        description: "Default free trial plan",
-        price: 0,
-        currency: "INR",
-        billingCycle: "monthly",
-        features: {
-          maxStudents: 50,
-          maxStorageGB: 5,
-          customDomain: false,
-        }
-      });
     }
 
     // Create Institute
@@ -66,22 +49,8 @@ export async function adminGoogleRegister(req: Request, res: Response) {
       subdomain,
       adminName: name || "Admin",
       adminEmail: email,
-      isActive: true,
+      isActive: true, // Note: Subscription is pending, will be set in /subscription/activate
     });
-
-    // Create Subscription
-    const subscription = await SubscriptionModel.create({
-      institute: institute._id,
-      planId: freePlan._id, // Renamed from plan to planId based on Phase 3 schema
-      status: "active",
-      startDate: new Date(),
-      endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // 1 year free trial
-      limits: freePlan.features, // Renamed from limitsSnapshot to limits based on Phase 3 schema
-    });
-
-    // Update Institute with subscription
-    institute.currentSubscription = subscription._id as any;
-    await institute.save();
 
     // Create Email (Role: Admin)
     const newEmail = await EmailModel.create({
@@ -144,14 +113,25 @@ export async function adminGoogleLogin(req: Request, res: Response) {
     }
 
     const { email } = payload;
-    const isEmailExist = await EmailModel.findOne({ email });
+    const isEmailExist = await EmailModel.findOne({ email }).setOptions({ bypassTenantFilter: true });
     if (isEmailExist) {
       if (isEmailExist.role !== "Admin") {
         return res
           .status(401)
           .json({ message: "Unauthorized! You are not an Admin." });
       }
-      const admin = await AdminModel.findOne({ email: isEmailExist._id });
+      const admin = await AdminModel.findOne({ email: isEmailExist._id }).setOptions({ bypassTenantFilter: true });
+
+      // FIX ZOMBIE ACCOUNTS: Check if Institute still exists in DB
+      const instituteExists = await InstituteModel.findById(isEmailExist.institute);
+      if (!instituteExists) {
+        // The user manually deleted the Institute from the DB but left the Email/Admin records (orphaned zombie state)
+        // Auto-cleanup so they can re-register freshly instead of logging into a ghost town.
+        await AdminModel.deleteMany({ email: isEmailExist._id });
+        await EmailModel.deleteOne({ _id: isEmailExist._id });
+        return res.status(404).json({ message: "Your institute was deleted from the database. We have wiped your orphaned account. Please go back and Register freshly!" });
+      }
+
       const jwtToken = jwt.sign(
         { 
           email, 
@@ -207,14 +187,14 @@ export async function trainerGoogleLogin(req: Request, res: Response) {
     }
 
     const { email } = payload;
-    const isEmailExist = await EmailModel.findOne({ email });
+    const isEmailExist = await EmailModel.findOne({ email }).setOptions({ bypassTenantFilter: true });
     if (isEmailExist) {
       if (isEmailExist.role !== "Trainer") {
         return res
           .status(401)
           .json({ message: "Unauthorized! You are not a Trainer." });
       }
-      const trainer = await TrainerModel.findOne({ email: isEmailExist._id });
+      const trainer = await TrainerModel.findOne({ email: isEmailExist._id }).setOptions({ bypassTenantFilter: true });
       const jwtToken = jwt.sign(
         { 
           email, 
@@ -288,7 +268,7 @@ export async function connectGoogle(req: Request, res: Response) {
 export async function studentLogin(req: Request, res: Response) {
   try {
     const { studentId, password } = req.body;
-    const student = await StudentModel.findOne({ studentId });
+    const student = await StudentModel.findOne({ studentId }).setOptions({ bypassTenantFilter: true });
     if (!student) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -343,7 +323,7 @@ export async function studentLogin(req: Request, res: Response) {
 export async function updateStudentPassword(req: Request, res: Response) {
   try {
     const { studentId, oldPassword, newPassword } = req.body;
-    const student = await StudentModel.findOne({ studentId });
+    const student = await StudentModel.findOne({ studentId }).setOptions({ bypassTenantFilter: true });
     if (!student) {
       return res.status(401).json({ message: "Unauthorized" });
     }

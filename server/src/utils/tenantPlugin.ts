@@ -2,42 +2,62 @@ import mongoose from "mongoose";
 import { TenantContext } from "./tenantContext.js";
 
 export const tenantPlugin = (schema: mongoose.Schema) => {
-  schema.pre("save", function (next) {
-    const instituteId = TenantContext.getInstituteId();
+  const hasInstituteField = !!schema.path("institute");
 
+  schema.pre("save", function () {
+    if (!hasInstituteField) return;
+
+    const instituteId = TenantContext.getInstituteId();
     if (instituteId) {
       if (this.isNew && !this.institute) {
         this.institute = new mongoose.Types.ObjectId(instituteId);
       }
+    } else if (!this.institute) {
+      // Only throw if context is missing AND the document doesn't already have an explicitly provided institute
+      throw new Error("Tenant context missing during save of tenant-scoped model.");
     }
-    next();
   });
 
   schema.pre("insertMany", function (next, docs) {
+    if (!hasInstituteField) return next();
+    
     const instituteId = TenantContext.getInstituteId();
-    if (instituteId) {
-      if (Array.isArray(docs)) {
-        docs.forEach((doc) => {
-          if (!doc.institute) {
-            doc.institute = new mongoose.Types.ObjectId(instituteId);
-          }
-        });
+    if (Array.isArray(docs)) {
+      for (const doc of docs) {
+        if (instituteId && !doc.institute) {
+          doc.institute = new mongoose.Types.ObjectId(instituteId);
+        } else if (!instituteId && !doc.institute) {
+          return next(new Error("Tenant context missing during insertMany of tenant-scoped model."));
+        }
       }
     }
     next();
   });
 
-  const applyTenantFilter = function (
-    this: mongoose.Query<any, any>,
-    next: mongoose.CallbackWithoutResultAndOptionalError,
-  ) {
+  const applyTenantFilter = function (this: mongoose.Query<any, any>) {
+    if (!hasInstituteField) return;
+    if (this.options?.bypassTenantFilter) return;
+
     const instituteId = TenantContext.getInstituteId();
 
     if (instituteId) {
       this.where({ institute: new mongoose.Types.ObjectId(instituteId) });
+    } else {
+      this.where({ institute: new mongoose.Types.ObjectId("000000000000000000000000") });
     }
-    next();
   };
+
+  schema.pre("aggregate", function () {
+    if (!hasInstituteField) return;
+    if (this.options?.bypassTenantFilter) return;
+
+    const instituteId = TenantContext.getInstituteId();
+    const matchStage = instituteId
+      ? { institute: new mongoose.Types.ObjectId(instituteId) }
+      : { institute: new mongoose.Types.ObjectId("000000000000000000000000") };
+
+    this.pipeline().unshift({ $match: matchStage });
+  });
 
   schema.pre("find", applyTenantFilter);
   schema.pre("findOne", applyTenantFilter);

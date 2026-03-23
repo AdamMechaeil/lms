@@ -2,7 +2,7 @@
 import React from "react";
 import { WavyBackground } from "../ui/wavy-background";
 import { HoverEffect } from "../ui/card-hover-effect";
-import { GraduationCap, UserCog } from "lucide-react";
+import { GraduationCap, UserCog, Building2 } from "lucide-react";
 
 export default function Main() {
   const items = [
@@ -17,6 +17,12 @@ export default function Main() {
       description: "Manage your batches and students",
       link: "/Auth/trainer",
       icon: <UserCog className="h-8 w-8 text-neutral-500" />,
+    },
+    {
+      title: "Institute Admin",
+      description: "Manage your LMS operations",
+      link: "/Auth/admin/login",
+      icon: <Building2 className="h-8 w-8 text-neutral-500" />,
     },
   ];
 
