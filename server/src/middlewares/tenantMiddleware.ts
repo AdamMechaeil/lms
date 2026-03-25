@@ -71,3 +71,23 @@ export const tenantMiddleware = async (
     next();
   }
 };
+
+/**
+ * Restores the Tenant Context explicitly after context-losing middleware like Multer.
+ * File uploads stream asynchronously in ways that Node's AsyncLocalStorage sometimes drops.
+ */
+export const restoreTenantContext = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  // Authentication middleware sets req.user.instituteId or req.instituteId
+  const instituteId = (req as any).user?.instituteId || (req as any).instituteId;
+  if (instituteId) {
+    TenantContext.run(instituteId, () => {
+      next();
+    });
+  } else {
+    next();
+  }
+};

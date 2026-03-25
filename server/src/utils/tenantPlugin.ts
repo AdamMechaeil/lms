@@ -4,7 +4,7 @@ import { TenantContext } from "./tenantContext.js";
 export const tenantPlugin = (schema: mongoose.Schema) => {
   const hasInstituteField = !!schema.path("institute");
 
-  schema.pre("save", function () {
+  schema.pre("validate", function () {
     if (!hasInstituteField) return;
 
     const instituteId = TenantContext.getInstituteId();
@@ -18,8 +18,8 @@ export const tenantPlugin = (schema: mongoose.Schema) => {
     }
   });
 
-  schema.pre("insertMany", function (next, docs) {
-    if (!hasInstituteField) return next();
+  schema.pre("insertMany", function (docs: any[]) {
+    if (!hasInstituteField) return;
     
     const instituteId = TenantContext.getInstituteId();
     if (Array.isArray(docs)) {
@@ -27,11 +27,10 @@ export const tenantPlugin = (schema: mongoose.Schema) => {
         if (instituteId && !doc.institute) {
           doc.institute = new mongoose.Types.ObjectId(instituteId);
         } else if (!instituteId && !doc.institute) {
-          return next(new Error("Tenant context missing during insertMany of tenant-scoped model."));
+          throw new Error("Tenant context missing during insertMany of tenant-scoped model.");
         }
       }
     }
-    next();
   });
 
   const applyTenantFilter = function (this: mongoose.Query<any, any>) {

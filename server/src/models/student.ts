@@ -24,7 +24,6 @@ const studentSchema = new mongoose.Schema<Student>(
     studentId: {
       type: String,
       required: true,
-      unique: true,
     },
     password: {
       type: String,
@@ -37,7 +36,6 @@ const studentSchema = new mongoose.Schema<Student>(
     email: {
       type: String,
       required: true,
-      unique: true,
     },
     branch: {
       type: mongoose.Schema.Types.ObjectId,
@@ -47,7 +45,6 @@ const studentSchema = new mongoose.Schema<Student>(
     mobileNumber: {
       type: String,
       required: true,
-      unique: true,
     },
     profilePicture: {
       type: String,
@@ -76,6 +73,10 @@ const studentSchema = new mongoose.Schema<Student>(
   },
   { timestamps: true },
 );
+
+studentSchema.index({ institute: 1, studentId: 1 }, { unique: true });
+studentSchema.index({ institute: 1, email: 1 }, { unique: true });
+studentSchema.index({ institute: 1, mobileNumber: 1 }, { unique: true });
 
 const StudentModel = mongoose.model("Student", studentSchema);
 
