@@ -24,12 +24,17 @@ const StudentAttendance = dynamic(
   () => import("@/app/Components/Dashboard/Admin/Student/StudentAttendance"),
   { ssr: false },
 );
+const StudentFinancials = dynamic(
+  () => import("@/app/Components/Dashboard/Admin/Student/StudentFinancials"),
+  { ssr: false },
+);
 
 const TABS = [
   { id: "overview", label: "Overview" },
   { id: "courses", label: "Courses" },
   { id: "batches", label: "Batches" },
   { id: "attendance", label: "Attendance" },
+  { id: "financials", label: "Financials" },
 ];
 
 export default function StudentDetailPage() {
@@ -151,6 +156,9 @@ export default function StudentDetailPage() {
             )}
             {activeTab === "attendance" && (
               <StudentAttendance studentId={id as string} />
+            )}
+            {activeTab === "financials" && (
+              <StudentFinancials studentId={id as string} />
             )}
           </div>
         </div>

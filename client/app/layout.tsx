@@ -5,6 +5,7 @@ import { SocketProvider } from "@/app/Context/SocketContext";
 import { ThemeToggle } from "@/app/Components/Shared/theme-toggle";
 import { Toaster } from "sonner";
 import NextTopLoader from "nextjs-toploader";
+import Script from "next/script";
 import "./globals.css";
 
 
@@ -44,6 +45,7 @@ export default function RootLayout({
               {children}
               <ThemeToggle />
               <Toaster position="top-center" richColors />
+              <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
             </SocketProvider>
           </AuthProvider>
         </ThemeProvider>

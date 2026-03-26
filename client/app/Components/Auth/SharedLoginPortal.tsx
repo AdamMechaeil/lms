@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
-import { GraduationCap, UserCog, Building2, ArrowRight } from "lucide-react";
+import { GraduationCap, UserCog, Building2, ArrowRight, Users } from "lucide-react";
 import Link from "next/link";
 
 export default function SharedLoginPortal() {
@@ -36,6 +36,16 @@ export default function SharedLoginPortal() {
       shadow: "shadow-indigo-500/5 group-hover:shadow-[0_12px_40px_rgb(99,102,241,0.15)] dark:group-hover:shadow-[0_8px_30px_rgb(99,102,241,0.2)]",
       border: "group-hover:border-indigo-500/50",
     },
+    {
+      title: "Staff / Employee",
+      description: "Access your CRM, admissions, and administration tools.",
+      link: "/Auth/employee",
+      icon: <Users className="h-10 w-10 text-emerald-600 dark:text-teal-400 stroke-[1.5] drop-shadow-[0_2px_4px_rgba(16,185,129,0.2)]" />,
+      iconBg: "bg-emerald-50 dark:bg-white/5 ring-emerald-100 dark:ring-white/10",
+      topBorder: "border-t-emerald-500 dark:border-t-emerald-500/30",
+      shadow: "shadow-emerald-500/5 group-hover:shadow-[0_12px_40px_rgb(16,185,129,0.15)] dark:group-hover:shadow-[0_8px_30px_rgb(16,185,129,0.2)]",
+      border: "group-hover:border-emerald-500/50",
+    },
   ];
 
   return (
@@ -63,7 +73,7 @@ export default function SharedLoginPortal() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full px-2 md:px-0">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full px-2 md:px-0">
           {portals.map((portal, index) => (
             <Link href={portal.link} key={portal.title} className="block w-full h-full outline-none focus:ring-4 focus:ring-indigo-500/50 rounded-3xl">
               <motion.div

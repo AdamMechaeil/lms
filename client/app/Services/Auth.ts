@@ -12,6 +12,8 @@ import {
   ACTIVATE_SUBSCRIPTION,
 } from "../Utils/Constants/Auth";
 
+export const EMPLOYEE_LOGIN = "/auth/employee/signin";
+
 export async function Adminlogin(token: string) {
   try {
     const response = await AxiosInstance.post(ADMIN_LOGIN, { token });
@@ -63,6 +65,15 @@ export async function Trainerlogin(token: string) {
     return response.data;
   } catch (error: any) {
     throw error.response?.data?.message || "Login failed";
+  }
+}
+
+export async function Employeelogin(token: string) {
+  try {
+    const response = await AxiosInstance.post(EMPLOYEE_LOGIN, { token });
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data?.message || "Employee login failed. Please ensure you are invited.";
   }
 }
 

@@ -1,9 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, ShieldCheck } from "lucide-react";
 import { Button } from "../ui/button";
 import { GetPlans, ActivateSubscription } from "@/app/Services/Auth";
+import { createRazorpayOrder, verifyRazorpayPayment } from "@/app/Services/Subscription";
 import { toast } from "sonner";
 import { useAuth } from "@/app/Context/Authcontext";
 import { useRouter } from "next/navigation";
@@ -43,21 +44,87 @@ export default function PricingMain() {
     fetchPlans();
   }, []);
 
-  const handleSelectPlan = async (planId: string) => {
+  const handleSelectPlan = async (selectedPlan: Plan) => {
     if (!user) {
       toast.error("Please log in to select a plan");
       return;
     }
 
     try {
-      setActivatingPlanId(planId);
-      await ActivateSubscription(planId);
-      toast.success("Subscription Activated Successfully!");
-      setTimeout(() => {
-        router.push("/Dashboard/admin");
-      }, 1000);
+      setActivatingPlanId(selectedPlan._id);
+
+      // Branch 1: Free Plan Strategy
+      if (selectedPlan.price === 0) {
+        await ActivateSubscription(selectedPlan._id);
+        toast.success("Free Subscription Activated Successfully!");
+        setTimeout(() => {
+          router.push("/Dashboard/admin");
+        }, 1000);
+        return;
+      }
+
+      // Branch 2: Premium Razorpay Checkout Strategy
+      if (!(window as any).Razorpay) {
+        toast.error("Payment Gateway configuration missing. Please refresh.");
+        setActivatingPlanId(null);
+        return;
+      }
+
+      // 1. Generate Cryptographic Order on Backend
+      const { order } = await createRazorpayOrder(selectedPlan._id);
+
+      // 2. Initialize Hardware Razorpay UI
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
+        amount: order.amount,
+        currency: order.currency,
+        name: "LMS Pro Services",
+        description: `Upgrade to ${selectedPlan.name}`,
+        order_id: order.id,
+        handler: async function (response: any) {
+          // 3. Callback Verification Protocol
+          try {
+            const verificationPayload = {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              planId: selectedPlan._id,
+            };
+            
+            await verifyRazorpayPayment(verificationPayload);
+            toast.success("Payment verified! Your account is now upgraded.");
+            setTimeout(() => {
+              router.push("/Dashboard/admin");
+            }, 1000);
+          } catch (verifyError: any) {
+            toast.error(verifyError.response?.data?.message || "Payment Verification Failed!");
+            setActivatingPlanId(null);
+          }
+        },
+        prefill: {
+          name: user.name,
+          email: user.email,
+        },
+        theme: {
+          color: "#4f46e5", // Indigo 600
+        },
+        modal: {
+          ondismiss: function() {
+            toast.error("Checkout was cancelled.");
+            setActivatingPlanId(null);
+          }
+        }
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.on("payment.failed", function (response: any) {
+        toast.error(`Payment failed: ${response.error.description}`);
+        setActivatingPlanId(null);
+      });
+      rzp.open();
+
     } catch (error: any) {
-      toast.error(error || "Failed to activate subscription");
+      toast.error(error.response?.data?.message || error.message || "Checkout Failed to initialize");
       setActivatingPlanId(null);
     }
   };
@@ -175,7 +242,7 @@ export default function PricingMain() {
                 <Button
                   size="lg"
                   disabled={activatingPlanId !== null}
-                  onClick={() => handleSelectPlan(plan._id)}
+                  onClick={() => handleSelectPlan(plan)}
                   className={`relative z-10 w-full py-7 text-lg rounded-2xl font-bold tracking-wide transition-all duration-300 overflow-hidden ${
                     isPremium
                       ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md dark:shadow-[0_0_20px_rgba(79,70,229,0.4)] dark:hover:shadow-[0_0_30px_rgba(79,70,229,0.7)] hover:scale-[1.02]"
