@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { toast } from "sonner";
-import ConfirmationModal from "../Students/ConfirmationModal";
+import ConfirmationModal from "../ConfirmationModal";
 
 const AddEmployeeModal = dynamic(() => import("./AddEmployeeModal"), {
   ssr: false,

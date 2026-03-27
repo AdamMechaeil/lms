@@ -119,7 +119,7 @@ export default function AddRoleModal({
               </label>
               <div className="grid grid-cols-1 gap-3">
                 {AVAILABLE_PERMISSIONS.map((perm) => (
-                  <div key={perm.id} className="flex items-center space-x-3 p-2 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 rounded-lg transition-colors cursor-pointer" onClick={() => togglePermission(perm.id)}>
+                  <div key={perm.id} className="flex items-center space-x-3 p-2 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 rounded-lg transition-colors cursor-pointer">
                     <Checkbox 
                       id={perm.id} 
                       checked={formData.permissions.includes(perm.id)}

@@ -6,7 +6,7 @@ import EmailModel from "../models/email.js";
 export async function addEmployee(req: Request, res: Response) {
   try {
     const { name, email, role, contactNumber } = req.body;
-    const { instituteId } = req.user!; // Provided by auth middleware
+    const instituteId = (req as any).instituteId;
 
     // Check if email already registered for this institute
     const existingEmail = await EmailModel.findOne({ email, institute: instituteId });
@@ -38,7 +38,7 @@ export async function addEmployee(req: Request, res: Response) {
 // Get All Employees
 export async function getEmployees(req: Request, res: Response) {
   try {
-    const { instituteId } = req.user!;
+    const instituteId = (req as any).instituteId;
     const employees = await EmployeeModel.find({ institute: instituteId })
       .populate("email", "email")
       .populate("role", "name permissions");
@@ -54,7 +54,7 @@ export async function getEmployees(req: Request, res: Response) {
 export async function updateEmployee(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const { instituteId } = req.user!;
+    const instituteId = (req as any).instituteId;
     const { name, role, contactNumber, isActive } = req.body;
 
     const employee = await EmployeeModel.findOneAndUpdate(
@@ -78,7 +78,7 @@ export async function updateEmployee(req: Request, res: Response) {
 export async function deleteEmployee(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const { instituteId } = req.user!;
+    const instituteId = (req as any).instituteId;
     
     // Explicitly bypass tenant filter so it deletes globally if necessary, or just rely on the plugin
     const employee = await EmployeeModel.findOneAndDelete({ _id: id, institute: instituteId });

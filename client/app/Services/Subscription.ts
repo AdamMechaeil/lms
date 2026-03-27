@@ -1,17 +1,11 @@
-import axios from "axios";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+import AxiosInstance from "../Utils/AxiosInstance";
 
 export const createRazorpayOrder = async (planId: string) => {
-  const response = await axios.post(`${API_URL}/subscription/create-order`, { planId }, {
-    withCredentials: true,
-  });
+  const response = await AxiosInstance.post("/api/v1/subscription/create-order", { planId });
   return response.data;
 };
 
 export const verifyRazorpayPayment = async (data: any) => {
-  const response = await axios.post(`${API_URL}/subscription/verify`, data, {
-    withCredentials: true,
-  });
+  const response = await AxiosInstance.post("/api/v1/subscription/verify", data);
   return response.data;
 };
