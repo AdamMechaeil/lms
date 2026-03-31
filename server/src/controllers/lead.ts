@@ -5,6 +5,7 @@ import LeadModel from "../models/lead.js";
 import StudentModel from "../models/student.js";
 import CounterModel from "../models/counter.js";
 import { sendWelcomeEmail } from "../utils/Email.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 export const createLead = async (req: Request, res: Response) => {
   try {
@@ -131,7 +132,15 @@ export const convertLeadToStudent = async (req: Request, res: Response) => {
       status: "Active",
     });
 
-    // 4. Send Welcome Email
+    // 4. Log Activity (same as direct student creation)
+    await logActivity({
+      action: "STUDENT_REGISTERED",
+      description: `Lead ${lead.name} converted and enrolled as a student`,
+      target: newStudent._id,
+      metadata: { studentId: newStudent.studentId },
+    });
+
+    // 5. Send Welcome Email
     try {
         await sendWelcomeEmail(lead.email, lead.name, plainPassword);
     } catch (emailError) {

@@ -71,11 +71,11 @@ export default function PricingMain() {
       }
 
       // 1. Generate Cryptographic Order on Backend
-      const { order } = await createRazorpayOrder(selectedPlan._id);
+      const { order, key } = await createRazorpayOrder(selectedPlan._id);
 
       // 2. Initialize Hardware Razorpay UI
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
+        key: key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
         amount: order.amount,
         currency: order.currency,
         name: "LMS Pro Services",

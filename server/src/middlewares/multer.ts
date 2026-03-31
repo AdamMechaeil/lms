@@ -55,6 +55,7 @@ const storage = multerS3({
     else if (file.fieldname === "files" || file.fieldname === "materials")
       folder = "materials";
     else if (file.fieldname === "chatMedia") folder = "chat";
+    else if (file.fieldname === "instituteLogo") folder = "institute-logos";
 
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, `${folder}/${uniqueSuffix}${path.extname(file.originalname)}`);

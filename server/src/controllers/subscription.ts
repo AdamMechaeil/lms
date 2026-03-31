@@ -39,7 +39,7 @@ export async function createOrder(req: Request, res: Response) {
     const options = {
       amount: plan.price * 100, 
       currency: plan.currency || "INR",
-      receipt: `rcpt_${instituteId}_${Date.now()}`,
+      receipt: `rcpt_${Date.now()}`,
     };
 
     const order = await razorpay.orders.create(options);
@@ -48,6 +48,7 @@ export async function createOrder(req: Request, res: Response) {
       success: true,
       order,
       plan,
+      key: process.env.RAZORPAY_KEY_ID,
     });
   } catch (error) {
     console.error("Error creating Razorpay order:", error);

@@ -14,6 +14,7 @@ import {
   Briefcase,
   Shield,
   Target,
+  Settings,
 } from "lucide-react";
 
 export default function AdminLayout({
@@ -111,6 +112,13 @@ export default function AdminLayout({
       href: "/Dashboard/admin/leaves",
       icon: (
         <CalendarCheck className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
+    },
+    {
+      label: "Settings",
+      href: "/Dashboard/admin/settings",
+      icon: (
+        <Settings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
   ];
