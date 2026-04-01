@@ -6,6 +6,7 @@ export interface ITrainerAttendance extends mongoose.Document {
   totalDuration: number; // In milliseconds
   status: "Present" | "Half Day" | "Absent";
   sessionIds: mongoose.Types.ObjectId[]; // Refs to sessions used for calculation
+  institute: mongoose.Types.ObjectId;
 }
 
 const trainerAttendanceSchema = new mongoose.Schema<ITrainerAttendance>(
@@ -35,17 +36,25 @@ const trainerAttendanceSchema = new mongoose.Schema<ITrainerAttendance>(
         ref: "TrainerSession",
       },
     ],
+    institute: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Institute",
+      required: true,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Indexes
-trainerAttendanceSchema.index({ trainerId: 1, date: 1 }, { unique: true }); // One record per day per trainer
+trainerAttendanceSchema.index(
+  { trainerId: 1, date: 1, institute: 1 },
+  { unique: true },
+); // One record per day per trainer
 trainerAttendanceSchema.index({ date: 1 }); // For querying by date range
 
 const TrainerAttendanceModel = mongoose.model<ITrainerAttendance>(
   "TrainerAttendance",
-  trainerAttendanceSchema
+  trainerAttendanceSchema,
 );
 
 export default TrainerAttendanceModel;

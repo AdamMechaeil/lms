@@ -2,6 +2,7 @@
 import { cn } from "@/app/Utils/cn";
 import React, { useEffect, useRef, useState } from "react";
 import { createNoise3D } from "simplex-noise";
+import { useTheme } from "next-themes";
 
 export const WavyBackground = ({
   children,
@@ -27,6 +28,7 @@ export const WavyBackground = ({
   [key: string]: any;
 }) => {
   const noise = createNoise3D();
+  const { theme } = useTheme();
   let w: number,
     h: number,
     nt: number,
@@ -35,6 +37,9 @@ export const WavyBackground = ({
     ctx: any,
     canvas: any;
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const waveColorsRef = useRef<string[]>([]);
+  const backgroundFillRef = useRef<string>("");
+
   const getSpeed = () => {
     switch (speed) {
       case "slow":
@@ -46,46 +51,53 @@ export const WavyBackground = ({
     }
   };
 
+  const getComputedColor = (variable: string) => {
+    if (typeof window !== "undefined") {
+      const style = getComputedStyle(document.documentElement);
+      const hsl = style.getPropertyValue(variable).trim();
+      return hsl ? `hsl(${hsl})` : "#000000";
+    }
+    return "#000000";
+  };
+
   const init = () => {
     canvas = canvasRef.current;
+    if (!canvas) return;
     ctx = canvas.getContext("2d");
     w = ctx.canvas.width = window.innerWidth;
     h = ctx.canvas.height = window.innerHeight;
     ctx.filter = `blur(${blur}px)`;
     nt = 0;
+
+    waveColorsRef.current = colors ?? [
+      getComputedColor("--primary"),
+      getComputedColor("--secondary"),
+      getComputedColor("--accent"),
+      getComputedColor("--primary"),
+      getComputedColor("--secondary"),
+    ];
+    backgroundFillRef.current =
+      backgroundFill || getComputedColor("--background");
+
     window.onresize = function () {
-      w = ctx.canvas.width = window.innerWidth;
-      h = ctx.canvas.height = window.innerHeight;
-      ctx.filter = `blur(${blur}px)`;
+      if (ctx) {
+        w = ctx.canvas.width = window.innerWidth;
+        h = ctx.canvas.height = window.innerHeight;
+        ctx.filter = `blur(${blur}px)`;
+      }
     };
     render();
   };
 
-  const getComputedColor = (variable: string) => {
-    if (typeof window !== "undefined") {
-      const style = getComputedStyle(document.documentElement);
-      const hsl = style.getPropertyValue(variable).trim();
-      return `hsl(${hsl})`;
-    }
-    return "#000000"; // Fallback
-  };
-
-  const waveColors = colors ?? [
-    getComputedColor("--primary"),
-    getComputedColor("--secondary"),
-    getComputedColor("--accent"),
-    getComputedColor("--primary"),
-    getComputedColor("--secondary"),
-  ];
   const drawWave = (n: number) => {
     nt += getSpeed();
     for (i = 0; i < n; i++) {
       ctx.beginPath();
       ctx.lineWidth = waveWidth || 50;
-      ctx.strokeStyle = waveColors[i % waveColors.length];
+      ctx.strokeStyle = waveColorsRef.current[i % waveColorsRef.current.length];
       for (x = 0; x < w; x += 5) {
         var y = noise(x / 800, 0.3 * i, nt) * 100;
-        ctx.lineTo(x, y + h * 0.5); // adjust for height, currently at 50% of the container
+        ctx.lineTo(x, y + h * 0.5);
       }
       ctx.stroke();
       ctx.closePath();
@@ -94,7 +106,8 @@ export const WavyBackground = ({
 
   let animationId: number;
   const render = () => {
-    ctx.fillStyle = backgroundFill || getComputedColor("--background");
+    if (!ctx) return;
+    ctx.fillStyle = backgroundFillRef.current;
     ctx.globalAlpha = waveOpacity || 0.5;
     ctx.fillRect(0, 0, w, h);
     drawWave(5);
@@ -102,19 +115,24 @@ export const WavyBackground = ({
   };
 
   useEffect(() => {
-    init();
+    const timeoutId = setTimeout(() => {
+      init();
+    }, 50);
+
     return () => {
-      cancelAnimationFrame(animationId);
+      clearTimeout(timeoutId);
+      if (typeof window !== "undefined") {
+        cancelAnimationFrame(animationId);
+      }
     };
-  }, []);
+  }, [theme]);
 
   const [isSafari, setIsSafari] = useState(false);
   useEffect(() => {
-    // Support for Safari
     setIsSafari(
       typeof window !== "undefined" &&
         navigator.userAgent.includes("Safari") &&
-        !navigator.userAgent.includes("Chrome")
+        !navigator.userAgent.includes("Chrome"),
     );
   }, []);
 
@@ -122,7 +140,7 @@ export const WavyBackground = ({
     <div
       className={cn(
         "h-screen flex flex-col items-center justify-center",
-        containerClassName
+        containerClassName,
       )}
     >
       <canvas

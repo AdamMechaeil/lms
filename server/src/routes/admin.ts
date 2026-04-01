@@ -1,6 +1,8 @@
 import express from "express";
-import { getDashboardStats, getRecentActivity } from "../controllers/admin.js";
+import { getDashboardStats, getRecentActivity, getInstituteProfile, updateInstituteBranding } from "../controllers/admin.js";
 import { adminAuthenticator } from "../middlewares/adminAuthenticator.js";
+import { commonAuthenticator } from "../middlewares/commonAuthenticator.js";
+import { upload } from "../middlewares/multer.js";
 
 const router = express.Router();
 
@@ -20,5 +22,12 @@ router.use(adminAuthenticator); // Protect all admin routes
 
 router.get("/dashboard/stats", getDashboardStats);
 router.get("/dashboard/activity", getRecentActivity);
+router.get("/institute/profile", getInstituteProfile);
+
+// Shared: Any authenticated user can read their own institute branding
+router.get("/institute/profile/shared", commonAuthenticator, getInstituteProfile);
+
+// Admin only: update institute logo
+router.patch("/institute/branding", upload.single("instituteLogo"), updateInstituteBranding);
 
 export default router;

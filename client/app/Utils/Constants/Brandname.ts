@@ -1,1 +1,1 @@
-export const BRAND_NAME="LMS"
+export const BRAND_NAME="Modern Sensei";

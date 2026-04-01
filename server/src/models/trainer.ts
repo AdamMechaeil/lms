@@ -11,6 +11,7 @@ export interface Trainer extends mongoose.Document {
   gender: string;
   googleRefreshToken?: string;
   firstLogin: boolean;
+  institute: mongoose.Types.ObjectId;
 }
 
 const trainerSchema = new mongoose.Schema<Trainer>(
@@ -37,8 +38,13 @@ const trainerSchema = new mongoose.Schema<Trainer>(
     gender: { type: String, enum: ["Male", "Female", "Other"], required: true },
     googleRefreshToken: { type: String, select: false },
     firstLogin: { type: Boolean, default: true },
+    institute: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Institute",
+      required: true,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const TrainerModel = mongoose.model("Trainer", trainerSchema);

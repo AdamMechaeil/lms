@@ -9,8 +9,8 @@ import {
 import { adminAuthenticator } from "../middlewares/adminAuthenticator.js";
 
 import { upload } from "../middlewares/multer.js";
-
 import { admintrainerAuthenticator } from "../middlewares/admintrainerAuthenticator.js";
+import { restoreTenantContext } from "../middlewares/tenantMiddleware.js";
 
 const trainerRouter = express.Router();
 
@@ -18,6 +18,7 @@ trainerRouter.post(
   "/addTrainer",
   adminAuthenticator,
   upload.single("profilePicture"),
+  restoreTenantContext,
   createTrainer,
 );
 trainerRouter.get("/getAllTrainers", adminAuthenticator, getAllTrainers);
@@ -30,6 +31,7 @@ trainerRouter.put(
   "/updateTrainer/:id",
   adminAuthenticator,
   upload.single("profilePicture"),
+  restoreTenantContext,
   updateTrainer,
 );
 trainerRouter.delete("/deleteTrainer/:id", adminAuthenticator, deleteTrainer);

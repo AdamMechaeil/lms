@@ -5,6 +5,7 @@ export interface Course extends mongoose.Document {
   description: string;
   image: string;
   type: "Regular" | "Custom";
+  institute: mongoose.Types.ObjectId;
 }
 
 const courseSchema = new mongoose.Schema<Course>({
@@ -22,6 +23,11 @@ const courseSchema = new mongoose.Schema<Course>({
     type: String,
     required: true,
     enum: ["Regular", "Custom"],
+  },
+  institute: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Institute",
+    required: true,
   },
 });
 

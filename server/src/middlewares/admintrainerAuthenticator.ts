@@ -4,21 +4,24 @@ import jwt from "jsonwebtoken";
 interface JWTPayload extends jwt.JwtPayload {
   email: string;
   role: "Admin" | "Trainer";
+  instituteId?: string;
 }
 
 export const admintrainerAuthenticator = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
-  const token = req.cookies.accessToken;
+  // Support both HTTP-only Cookies (Prod) and Bearer tokens (Testing)
+  const token = req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
+  
   if (!token) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ message: "Unauthorized: No token provided" });
   }
   try {
     const decode = jwt.verify(
       token,
-      process.env.JWT_SECRET as string
+      process.env.JWT_SECRET as string,
     ) as JWTPayload;
     if (!decode) {
       return res.status(401).json({ message: "Unauthorized" });

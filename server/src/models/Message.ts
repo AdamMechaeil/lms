@@ -9,6 +9,7 @@ export interface Message extends mongoose.Document {
   type: "text" | "image" | "video" | "audio" | "file";
   fileUrl?: string;
   createdAt: Date;
+  institute: mongoose.Types.ObjectId;
 }
 
 const messageSchema = new mongoose.Schema<Message>(
@@ -44,6 +45,11 @@ const messageSchema = new mongoose.Schema<Message>(
     },
     fileUrl: {
       type: String,
+    },
+    institute: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Institute",
+      required: true,
     },
   },
   { timestamps: true },

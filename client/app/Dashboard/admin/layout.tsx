@@ -11,6 +11,10 @@ import {
   FileText,
   Bell,
   CalendarCheck,
+  Briefcase,
+  Shield,
+  Target,
+  Settings,
 } from "lucide-react";
 
 export default function AdminLayout({
@@ -34,6 +38,20 @@ export default function AdminLayout({
       ),
     },
     {
+      label: "Employees",
+      href: "/Dashboard/admin/employees",
+      icon: (
+        <Briefcase className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
+    },
+    {
+      label: "Roles",
+      href: "/Dashboard/admin/roles",
+      icon: (
+        <Shield className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
+    },
+    {
       label: "Students",
       href: "/Dashboard/admin/students",
       icon: (
@@ -52,6 +70,13 @@ export default function AdminLayout({
       href: "/Dashboard/admin/batches",
       icon: (
         <Layers className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
+    },
+    {
+      label: "Leads (Admissions)",
+      href: "/Dashboard/admin/leads",
+      icon: (
+        <Target className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
     {
@@ -87,6 +112,13 @@ export default function AdminLayout({
       href: "/Dashboard/admin/leaves",
       icon: (
         <CalendarCheck className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
+    },
+    {
+      label: "Settings",
+      href: "/Dashboard/admin/settings",
+      icon: (
+        <Settings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
   ];

@@ -1,7 +1,10 @@
 export const ADMIN_LOGIN = "/auth/admin/signin";
+export const ADMIN_REGISTER = "/auth/admin/register";
 export const TRAINER_LOGIN = "/auth/trainer/signin";
 export const VERIFY_TOKEN = "/auth/verify-token";
 export const CONNECT_GOOGLE = "/auth/connect-google";
 export const UPDATE_STUDENT_PASSWORD = "/auth/student/update-password";
 export const LOGOUT = "/auth/logout";
 export const STUDENT_LOGIN = "/auth/student/login";
+export const GET_PLANS = "/api/v1/saas/plans";
+export const ACTIVATE_SUBSCRIPTION = "/api/v1/saas/subscription/activate";

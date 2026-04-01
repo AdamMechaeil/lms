@@ -7,6 +7,7 @@ import RetroGrid from "@/app/Components/ui/retro-grid";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import NotificationBell from "../NotificationBell";
+import MinimalFooter from "../Footer/MinimalFooter";
 
 interface SharedDashboardLayoutProps {
   links: {
@@ -56,13 +57,14 @@ export default function SharedDashboardLayout({
       {/* Glass Sidebar & Content Wrapper */}
       <div className="relative z-10 flex flex-col md:flex-row h-full w-full">
         <Sidebar links={links} userType={userType} />
-        <main className="flex-1 overflow-y-auto relative">
+        <main className="flex-1 overflow-y-auto relative flex flex-col">
           {/* Floating Notification Bell (Top Right) */}
           <div className="absolute top-4 right-4 z-50">
             <NotificationBell />
           </div>
 
-          <div className="h-full w-full">{children}</div>
+          <div className="w-full flex-grow">{children}</div>
+          <MinimalFooter />
         </main>
       </div>
     </div>

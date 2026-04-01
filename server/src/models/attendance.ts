@@ -13,6 +13,7 @@ export interface IAttendance extends mongoose.Document {
   trainerStatus: "Present" | "Absent" | "Half Day";
   markedBy: mongoose.Types.ObjectId;
   markedByModel: "Trainer" | "Admin";
+  institute: mongoose.Types.ObjectId;
 }
 
 const attendanceSchema = new mongoose.Schema<IAttendance>(
@@ -60,18 +61,23 @@ const attendanceSchema = new mongoose.Schema<IAttendance>(
       required: true,
       enum: ["Trainer", "Admin"],
     },
+    institute: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Institute",
+      required: true,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Indexes for performance
-attendanceSchema.index({ batchId: 1, date: 1 }, { unique: true }); // One record per batch per day
+attendanceSchema.index({ batchId: 1, date: 1, institute: 1 }, { unique: true }); // One record per batch per day per institute
 attendanceSchema.index({ "records.studentId": 1 }); // Fast student history lookup
 attendanceSchema.index({ trainerId: 1 }); // Fast trainer history lookup
 
 const AttendanceModel = mongoose.model<IAttendance>(
   "Attendance",
-  attendanceSchema
+  attendanceSchema,
 );
 
 export default AttendanceModel;

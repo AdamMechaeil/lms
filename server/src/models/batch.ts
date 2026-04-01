@@ -12,6 +12,7 @@ export interface Batch extends mongoose.Document {
   currentTopic: string;
   type: "Weekdays" | "Weekends";
   googleMeetLink: string;
+  institute: mongoose.Types.ObjectId;
 }
 
 const batchSchema = new mongoose.Schema<Batch>(
@@ -60,6 +61,11 @@ const batchSchema = new mongoose.Schema<Batch>(
     },
     googleMeetLink: {
       type: String,
+    },
+    institute: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Institute",
+      required: true,
     },
   },
   { timestamps: true },

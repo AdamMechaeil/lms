@@ -11,6 +11,7 @@ import {
 import { admintrainerAuthenticator } from "../middlewares/admintrainerAuthenticator.js";
 
 import { upload } from "../middlewares/multer.js";
+import { restoreTenantContext } from "../middlewares/tenantMiddleware.js";
 
 const materialRouter = express.Router();
 
@@ -18,6 +19,7 @@ materialRouter.post(
   "/createMaterial",
   admintrainerAuthenticator,
   upload.array("files"),
+  restoreTenantContext,
   createMaterial
 );
 materialRouter.get(

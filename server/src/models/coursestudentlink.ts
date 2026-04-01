@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 export interface CourseStudentLink extends mongoose.Document {
   course: mongoose.Types.ObjectId;
   student: mongoose.Types.ObjectId;
+  institute: mongoose.Types.ObjectId;
 }
 
 const courseStudentLinkSchema = new mongoose.Schema<CourseStudentLink>({
@@ -16,11 +17,16 @@ const courseStudentLinkSchema = new mongoose.Schema<CourseStudentLink>({
     ref: "Student",
     required: true,
   },
+  institute: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Institute",
+    required: true,
+  },
 });
 
 const CourseStudentLinkModel = mongoose.model(
   "CourseStudentLink",
-  courseStudentLinkSchema
+  courseStudentLinkSchema,
 );
 
 export default CourseStudentLinkModel;

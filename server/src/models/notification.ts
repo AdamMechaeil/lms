@@ -8,6 +8,7 @@ export interface INotification extends mongoose.Document {
   sender: mongoose.Types.ObjectId; // Admin ID
   readBy: mongoose.Types.ObjectId[]; // Users who have read the notification
   createdAt: Date;
+  institute: mongoose.Types.ObjectId;
 }
 
 const notificationSchema = new mongoose.Schema<INotification>(
@@ -37,6 +38,11 @@ const notificationSchema = new mongoose.Schema<INotification>(
         // No strict ref here as it can be Student or Trainer
       },
     ],
+    institute: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Institute",
+      required: true,
+    },
   },
   { timestamps: true },
 );

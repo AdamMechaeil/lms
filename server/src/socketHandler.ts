@@ -66,7 +66,6 @@ export const initializeSocket = (io: SocketIOServer) => {
     });
 
     // --- NOTIFICATION LOGIC ---
-    // --- NOTIFICATION LOGIC ---
     socket.on(
       "join_notifications",
       async (data: { userId: string; role: string }) => {
@@ -176,9 +175,6 @@ export const initializeSocket = (io: SocketIOServer) => {
     socket.on("disconnect", async () => {
       console.log("Client disconnected:", socket.id);
       activeSessions.delete(socket.id);
-      // We do NOT close the session here.
-      // If it's a refresh, they will reconnect and resume.
-      // If it's a close tab, the Scheduler will auto-close it after timeout.
     });
   });
 };

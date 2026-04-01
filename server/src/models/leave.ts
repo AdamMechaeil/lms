@@ -7,6 +7,7 @@ export interface ILeave extends mongoose.Document {
   reason: string;
   status: "Pending" | "Approved" | "Rejected";
   approvedBy?: mongoose.Types.ObjectId;
+  institute: mongoose.Types.ObjectId;
 }
 
 const leaveSchema = new mongoose.Schema<ILeave>(
@@ -27,6 +28,11 @@ const leaveSchema = new mongoose.Schema<ILeave>(
     approvedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Admin", // Assuming Admin model exists
+    },
+    institute: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Institute",
+      required: true,
     },
   },
   { timestamps: true },
