@@ -24,7 +24,6 @@ export const commonAuthenticator = (
       token,
       process.env.JWT_SECRET as string,
     ) as JWTPayload;
-    console.log(decode);
     if (!decode) {
       return res.status(401).json({ message: "Unauthorized" });
     }

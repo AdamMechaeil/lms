@@ -6,9 +6,9 @@ import { motion } from "framer-motion";
 import { BRAND_NAME } from "@/app/Utils/Constants/Brandname";
 import { WavyBackground } from "@/app/Components/ui/wavy-background";
 import { toast } from "sonner";
-import { Loader2, User, Lock, Eye, EyeOff } from "lucide-react";
+import { Loader2, User, Lock, Eye, EyeOff, Building2, Search, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Studentlogin, UpdateStudentPassword } from "@/app/Services/Auth";
+import { Studentlogin, UpdateStudentPassword, SearchInstitutes } from "@/app/Services/Auth";
 import {
   Dialog,
   DialogContent,
@@ -38,6 +38,34 @@ export default function Main() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // Institute Search State
+  const [searchQuery, setSearchQuery] = useState("");
+  const [institutes, setInstitutes] = useState<any[]>([]);
+  const [selectedInstitute, setSelectedInstitute] = useState<any>(null);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setInstitutes([]);
+      return;
+    }
+
+    const delayDebounceFn = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const results = await SearchInstitutes(searchQuery);
+        setInstitutes(results);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
+
   useEffect(() => {
     let currentIndex = 0;
     const interval = setInterval(() => {
@@ -55,9 +83,18 @@ export default function Main() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedInstitute) {
+      toast.error("Please explicitly select your institute from the dropdown");
+      return;
+    }
+    
     setLoading(true);
     try {
-      const response = await Studentlogin({ studentId, password });
+      const response = await Studentlogin({ 
+        studentId, 
+        password,
+        instituteId: selectedInstitute._id 
+      });
       if (response.message === "First Login! Update your password") {
         toast.info("First login detected. Please update your password.");
         setShowUpdatePassword(true);
@@ -95,6 +132,7 @@ export default function Main() {
         studentId,
         oldPassword: password,
         newPassword,
+        instituteId: selectedInstitute._id,
       });
       toast.success(
         "Password updated successfully! Please login with new password.",
@@ -144,6 +182,66 @@ export default function Main() {
             onSubmit={handleLogin}
             className="w-full space-y-4"
           >
+            {/* Institute Selection */}
+            <div className="space-y-2 relative">
+              <div className="relative group">
+                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <input
+                  type="text"
+                  placeholder="Search your Institute..."
+                  value={selectedInstitute ? selectedInstitute.name : searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    if (selectedInstitute) setSelectedInstitute(null);
+                    setShowDropdown(true);
+                  }}
+                  onFocus={() => setShowDropdown(true)}
+                  className="w-full pl-10 pr-10 py-3 bg-zinc-100/50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white/50 dark:focus:bg-white/10 transition-all font-medium"
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {searchLoading ? (
+                    <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
+                  ) : selectedInstitute ? (
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                  ) : (
+                    <Search className="w-5 h-5 text-muted-foreground" />
+                  )}
+                </div>
+              </div>
+
+              {/* Dropdown Results */}
+              {showDropdown && (searchQuery || institutes.length > 0) && !selectedInstitute && (
+                <div className="absolute z-50 w-full mt-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-xl shadow-xl max-h-60 overflow-y-auto overflow-hidden">
+                  {institutes.length === 0 && searchQuery && !searchLoading ? (
+                    <div className="p-4 text-center text-sm text-muted-foreground">
+                      No institutes found matching "{searchQuery}"
+                    </div>
+                  ) : (
+                    institutes.map((inst) => (
+                      <div
+                        key={inst._id}
+                        onClick={() => {
+                          setSelectedInstitute(inst);
+                          setSearchQuery("");
+                          setShowDropdown(false);
+                        }}
+                        className="flex items-center gap-3 p-3 hover:bg-zinc-100 dark:hover:bg-white/5 cursor-pointer transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-0"
+                      >
+                        {inst.logoUrl ? (
+                          <img src={inst.logoUrl} alt={inst.name} className="w-8 h-8 rounded-md object-cover" />
+                        ) : (
+                          <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase" style={{ color: inst.primaryColor || '#38bdf8' }}>
+                            {inst.name.substring(0, 2)}
+                          </div>
+                        )}
+                        <span className="font-medium text-sm text-foreground">{inst.name}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+
             <div className="space-y-2">
               <div className="relative group">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -187,7 +285,7 @@ export default function Main() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
-              disabled={loading}
+              disabled={loading || !selectedInstitute}
               className="w-full relative group overflow-hidden rounded-xl bg-primary px-4 py-3.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
             >
               <span className="relative z-10 flex items-center justify-center gap-2">

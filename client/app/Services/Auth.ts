@@ -13,6 +13,7 @@ import {
 } from "../Utils/Constants/Auth";
 
 export const EMPLOYEE_LOGIN = "/auth/employee/signin";
+export const SEARCH_INSTITUTES = "/auth/institutes/search";
 
 export async function Adminlogin(token: string) {
   try {
@@ -113,5 +114,14 @@ export async function Logout() {
     return response.data;
   } catch (error: any) {
     throw error.response?.data?.message || "Logout failed";
+  }
+}
+
+export async function SearchInstitutes(query: string) {
+  try {
+    const response = await AxiosInstance.get(`${SEARCH_INSTITUTES}?query=${query}`);
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data?.message || "Failed to search institutes";
   }
 }

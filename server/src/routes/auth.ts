@@ -9,6 +9,7 @@ import {
   verifyToken,
   logout,
   employeeGoogleLogin,
+  searchInstitutes,
 } from "../controllers/auth.js";
 
 const authRouter = express.Router();
@@ -30,5 +31,7 @@ authRouter.post("/student/update-password", updateStudentPassword);
 authRouter.post("/verify-token", verifyToken);
 
 authRouter.post("/logout", logout);
+
+authRouter.get("/institutes/search", searchInstitutes);
 
 export default authRouter;

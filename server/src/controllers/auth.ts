@@ -280,8 +280,13 @@ export async function connectGoogle(req: Request, res: Response) {
 
 export async function studentLogin(req: Request, res: Response) {
   try {
-    const { studentId, password } = req.body;
-    const student = await StudentModel.findOne({ studentId }).setOptions({
+    const { studentId, password, instituteId } = req.body;
+    
+    if (!instituteId) {
+      return res.status(400).json({ message: "Institute selection is required." });
+    }
+
+    const student = await StudentModel.findOne({ studentId, institute: instituteId }).setOptions({
       bypassTenantFilter: true,
     });
     if (!student) {
@@ -337,8 +342,13 @@ export async function studentLogin(req: Request, res: Response) {
 
 export async function updateStudentPassword(req: Request, res: Response) {
   try {
-    const { studentId, oldPassword, newPassword } = req.body;
-    const student = await StudentModel.findOne({ studentId }).setOptions({
+    const { studentId, oldPassword, newPassword, instituteId } = req.body;
+    
+    if (!instituteId) {
+      return res.status(400).json({ message: "Institute selection is required." });
+    }
+
+    const student = await StudentModel.findOne({ studentId, institute: instituteId }).setOptions({
       bypassTenantFilter: true,
     });
     if (!student) {
@@ -483,6 +493,29 @@ export async function employeeGoogleLogin(req: Request, res: Response) {
       verified: true,
       token: jwtToken,
     });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function searchInstitutes(req: Request, res: Response) {
+  try {
+    const { query } = req.query;
+    if (!query || typeof query !== "string") {
+      return res.status(400).json({ message: "Search query is required." });
+    }
+
+    // Must bypass tenant filter to search globally
+    const institutes = await InstituteModel.find({
+      name: { $regex: query, $options: "i" },
+      isActive: true,
+    })
+      .select("_id name logoUrl subdomain primaryColor")
+      .limit(10)
+      .setOptions({ bypassTenantFilter: true });
+
+    return res.status(200).json(institutes);
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Internal Server Error" });
