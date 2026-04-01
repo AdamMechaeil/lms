@@ -33,9 +33,9 @@ export const tenantPlugin = (schema: mongoose.Schema) => {
     }
   });
 
-  const applyTenantFilter = function (this: mongoose.Query<any, any>) {
+  const applyTenantFilter = function (this: any) {
     if (!hasInstituteField) return;
-    if (this.options?.bypassTenantFilter) return;
+    if (this.options?.bypassTenantFilter || this.getOptions?.()?.bypassTenantFilter) return;
 
     const instituteId = TenantContext.getInstituteId();
 
@@ -46,7 +46,7 @@ export const tenantPlugin = (schema: mongoose.Schema) => {
     }
   };
 
-  schema.pre("aggregate", function () {
+  schema.pre("aggregate", function (this: any) {
     if (!hasInstituteField) return;
     if (this.options?.bypassTenantFilter) return;
 
