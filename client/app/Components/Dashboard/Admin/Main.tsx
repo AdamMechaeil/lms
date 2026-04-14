@@ -8,7 +8,6 @@ import {
   Activity,
 } from "lucide-react";
 import { BentoGrid, BentoGridItem } from "../../ui/bento-grid";
-import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import {
   AreaChart,
@@ -40,11 +39,7 @@ import { formatDistanceToNow } from "date-fns";
 interface Branch {
   _id: string;
   name: string;
-  // add other fields if necessary
 }
-
-// Helper to generate smooth SVG path (Catmull-Rom like) - REMOVED
-// Chart Component - REMOVED
 
 export function Main() {
   const [branches, setBranches] = useState<Branch[]>([]);
@@ -63,7 +58,6 @@ export function Main() {
   const [loading, setLoading] = useState(true);
   const { socket } = useSocket();
 
-  // Fetch initial data (Branches)
   useEffect(() => {
     const fetchBranches = async () => {
       try {
@@ -83,7 +77,6 @@ export function Main() {
     fetchBranches();
   }, []);
 
-  // Fetch filtered data (Students & Trainers)
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -112,7 +105,6 @@ export function Main() {
     fetchData();
   }, [selectedBranch]);
 
-  // Fetch Analytics (Global)
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
@@ -133,21 +125,17 @@ export function Main() {
     fetchAnalytics();
   }, []);
 
-  // Listen for Real-time Updates
   useEffect(() => {
     if (!socket) return;
 
     const handleNewActivity = (data: any) => {
-      // 1. Add to Activity Feed
       setRecentActivity((prev) => [data, ...prev].slice(0, 10));
 
-      // 2. Update Stats (Global) & Charts
       if (data.action === "STUDENT_REGISTERED") {
         setStats((prev) => ({
           ...prev,
           totalStudents: prev.totalStudents + 1,
         }));
-        // Update Chart: Increment last month's count
         setGrowthData((prev) => {
           const newData = [...prev];
           if (newData.length > 0) {
@@ -160,16 +148,6 @@ export function Main() {
           ...prev,
           totalTrainers: prev.totalTrainers + 1,
         }));
-      } else if (data.action === "BATCH_CREATED") {
-        // Only update if no branch filter is active, or if we knew which branch it belongs to.
-        // For now, global update is fine or we can skip strictly if filter is on.
-        // Since stats fetch is dependent on filter, we might desync if we just increment globally while viewing a specific branch.
-        // But for "All Branches", it's correct.
-        if (selectedBranch === "all") {
-          // logic to update totalBatches (but stats.totalBranches comes from getAllBranches length usually?)
-          // actually stats.totalBranches is set from branches array length.
-          // We can leave branches update to a re-fetch or manual add if needed.
-        }
       }
     };
 
@@ -203,14 +181,6 @@ export function Main() {
       watermark: <Users />,
     },
   ];
-
-  // Helper to map activity type to UI style
-  const getActivityType = (action: string) => {
-    if (action.includes("STUDENT")) return "student";
-    if (action.includes("TRAINER")) return "user";
-    if (action.includes("BATCH")) return "batch";
-    return "system";
-  };
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
